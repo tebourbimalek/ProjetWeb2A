@@ -1,0 +1,84 @@
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #121212;
+    color: #fff;
+    margin: 0;
+    padding: 0;
+}
+
+.login-container {
+    max-width: 400px;
+    margin: 60px auto;
+    padding: 30px;
+    background-color: #1e1e1e;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+}
+
+.logo-image {
+    display: block;
+    max-width: 150px;
+    height: auto;
+    margin: 0 auto 20px auto;
+}
+
+h1.logo {
+    text-align: center;
+    font-size: 32px;
+    margin-bottom: 10px;
+}
+
+h2 {
+    text-align: center;
+    font-weight: normal;
+    margin-bottom: 30px;
+}
+
+form label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+form input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: none;
+    border-radius: 5px;
+}
+
+.options {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    background-color: #1db954;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    margin-bottom: 15px;
+}
+
+button.social-login {
+    background-color: #3b3b3b;
+}
+
+.divider {
+    text-align: center;
+    margin: 20px 0;
+    font-size: 14px;
+    color: #aaa;
+}
+
+.register {
+    text-align: center;
+    font-size: 14px;
+}
