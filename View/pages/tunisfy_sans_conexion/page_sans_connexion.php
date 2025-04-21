@@ -49,7 +49,7 @@ $allartiste=allartiste();
             <img src="/projetweb/assets/img/logo.png" alt="Logo" class="logo">
             <div class="icon-container">
                 <div class="icon-house">
-                    <a href="/projetweb/pages/tunisfy_sans_conexion/page_sans_connexion.php"><i class="fa-solid fa-house" style="color: grey;font-size:20px;"></i></a>
+                    <a href="/projetweb/View/pages/tunisfy_sans_conexion/page_sans_connexion.php"><i class="fa-solid fa-house" style="color: grey;font-size:20px;"></i></a>
                 </div>
                 <span class="tooltip">Accueil</span>
             </div>

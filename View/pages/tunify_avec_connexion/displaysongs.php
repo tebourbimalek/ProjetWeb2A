@@ -3,7 +3,7 @@
 
 
 
-require_once 'C:\xampp\htdocs\projetweb\includes\config.php';
+require_once 'C:\xampp\htdocs\projetweb\Model\includes\config.php';
 
 
 

@@ -3,8 +3,9 @@
 
 // Include the necessary files
 require_once 'C:\xampp\htdocs\projetweb\controller\controller.php';
-include_once 'C:\xampp\htdocs\projetweb\includes\function.php';  // Include the function file
-require_once 'C:\xampp\htdocs\projetweb\includes\config.php';  // Include the config file to access the PDO connection
+include_once 'C:\xampp\htdocs\projetweb\Model\includes\function.php';  // Include the function file
+require_once 'C:\xampp\htdocs\projetweb\Model\includes\config.php';  // Include the config file to access the PDO connection
+require_once 'C:\xampp\htdocs\projetweb\Model\includes\user.php';
 
 $counter = 1;  // Initialize a counter for the song number
 $counter1 = 1; // Initialize a counter for the song number in the top songs section
@@ -46,18 +47,31 @@ $labelsJson = json_encode($labels);
 $dataJson = json_encode($data);
 
 if (!isset($_SESSION['user'])) {
-    // L'utilisateur n'est pas connecté, redirection vers login
-    header("Location: /projetweb/pages/tunisfy_sans_conexion/login.php");
-    exit;
+    header("Location: /projetweb/View/pages/tunisfy_sans_conexion/login.php");
+    exit; // Bonne pratique ici
 }
 
-$pdo = config::getConnexion();
+try {
+    $pdo = config::getConnexion();
+    
+    // Vérification admin retourne un objet User
+    $adminUser = checkIfAdmin($pdo); // Renommage pour clarté
+    
+    // Maintenant qu'on sait que c'est un admin, on peut logger si besoin
+    error_log("Admin access by: " . $adminUser->getEmail());
 
-// Vérifie et récupère les infos de l'admin
-$user = checkIfAdmin($pdo);
-
-
-$users = getAllUsers($pdo);
+    $userConnected = getUserInfo($pdo);
+    
+    // Récupération des utilisateurs
+    $users = getAllUsers($pdo);
+    
+} catch (PDOException $e) {
+    // Gestion d'erreurs propre
+    die("Erreur de base de données : " . $e->getMessage());
+} catch (Exception $e) {
+    // Pour les erreurs de checkIfAdmin
+    die($e->getMessage());
+}
 ?>
 
 
@@ -311,7 +325,7 @@ $users = getAllUsers($pdo);
         </div>
         
         <!-- Users Tab -->
-<div id="users" class="tab-content">
+        <div id="users" class="tab-content">
     <div class="content-section">
         <div class="section-header">
             <div class="section-title">All Users</div>
@@ -332,19 +346,22 @@ $users = getAllUsers($pdo);
                 </tr>
             </thead>
             <tbody id="all-users-table">
-                <?php foreach ($users as $omar): ?>
+                <?php $counter = 1; ?>
+                <?php foreach ($users as $user): ?>
                     <tr>
-                        <td> <?php echo $counter++ ?></td>
+                        <td><?php echo $counter++; ?></td>
                         <td>
-                        <img src="/projetweb/pages/tunify_avec_connexion/<?php echo htmlspecialchars($omar['image_path']); ?>" width="70" height="70">
+                            <img src="/projetweb/View/pages/tunify_avec_connexion/<?php echo htmlspecialchars($user->getImagePath()); ?>" 
+                                 width="70" height="70" 
+                                 alt="Profile de <?php echo htmlspecialchars($user->getNomUtilisateur()); ?>">
                         </td>
-                        <td><?php echo htmlspecialchars($omar['nom_utilisateur']); ?></td>
-                        <td><?php echo htmlspecialchars($omar['email']); ?></td>
-                        <td><?php echo htmlspecialchars($omar['type_utilisateur']); ?></td>
-                        <td><?php echo htmlspecialchars($omar['score']); ?></td>
-                        <td><?php echo htmlspecialchars($omar['date_creation']); ?></td>
+                        <td><?php echo htmlspecialchars($user->getNomUtilisateur()); ?></td>
+                        <td><?php echo htmlspecialchars($user->getEmail()); ?></td>
+                        <td><?php echo htmlspecialchars($user->getTypeUtilisateur()); ?></td>
+                        <td><?php echo htmlspecialchars($user->getScore()); ?></td>
+                        <td><?php echo htmlspecialchars($user->getDateCreation()); ?></td>
                         <td>
-                        <style>
+                            
     <style>
     /* Global Styles */
     body {
@@ -476,34 +493,36 @@ $users = getAllUsers($pdo);
     <div class="modal-content">
         <span class="close" onclick="closeModal()">&times;</span>
         <h3>Edit User Information</h3>
-        <!-- Form inside the modal -->
+        <!-- Formulaire utilisant les méthodes de l'objet User -->
         <form action="update_user.php" method="POST" id="editUserForm">
-            <input type="hidden" name="id" id="userId" value="<?php echo htmlspecialchars($user['artiste_id']); ?>">
+            <input type="hidden" name="id" id="userId" value="<?php echo htmlspecialchars($user->getId()); ?>">
 
             <div class="form-group">
-                <label for="name">Full Name</label>
-                <input type="text" class="form-control" name="name" id="userName" value="<?php echo htmlspecialchars($user['nom_utilisateur']); ?>" required>
+                <label for="name">User Name</label>
+                <input type="text" class="form-control" name="name" id="userName" 
+                       value="<?php echo htmlspecialchars($user->getNomUtilisateur()); ?>" required>
             </div>
 
             <div class="form-group">
                 <label for="email">Email</label>
-                <input type="email" class="form-control" name="email" id="userEmail" value="<?php echo htmlspecialchars($user['email']); ?>" required>
+                <input type="email" class="form-control" name="email" id="userEmail" 
+                       value="<?php echo htmlspecialchars($user->getEmail()); ?>" required>
             </div>
 
             <div class="form-group">
                 <label for="role">Role</label>
                 <select class="form-control" name="role" id="userRole" required>
-                    <option value="Admin" <?php echo $user['type_utilisateur'] === 'Admin' ? 'selected' : ''; ?>>Admin</option>
-                    <option value="Artiste" <?php echo $user['type_utilisateur'] === 'Artiste' ? 'selected' : ''; ?>>Artist</option>
-                    <option value="User" <?php echo $user['type_utilisateur'] === 'User' ? 'selected' : ''; ?>>User</option>
+                    <option value="Admin" <?php echo $user->getTypeUtilisateur() === 'Admin' ? 'selected' : ''; ?>>Admin</option>
+                    <option value="Artiste" <?php echo $user->getTypeUtilisateur() === 'Artiste' ? 'selected' : ''; ?>>Artist</option>
+                    <option value="User" <?php echo $user->getTypeUtilisateur() === 'User' ? 'selected' : ''; ?>>User</option>
                 </select>
             </div>
 
             <div class="form-group">
                 <label for="status">Status</label>
                 <select class="form-control" name="status" id="userStatus" required>
-                    <option value="Active" <?php echo $user['score'] === 'Active' ? 'selected' : ''; ?>>Active</option>
-                    <option value="Inactive" <?php echo $user['score'] === 'Inactive' ? 'selected' : ''; ?>>Inactive</option>
+                    <option value="Active" <?php echo $user->getScore() == 'Active' ? 'selected' : ''; ?>>Active</option>
+                    <option value="Inactive" <?php echo $user->getScore() == 'Inactive' ? 'selected' : ''; ?>>Inactive</option>
                 </select>
             </div>
 
@@ -515,8 +534,16 @@ $users = getAllUsers($pdo);
     </div>
 </div>
 
-<!-- Button to Trigger Modal -->
-<a href="javascript:void(0);" onclick="openEditModal(<?php echo $user['artiste_id']; ?>, '<?php echo addslashes($user['nom_utilisateur']); ?>', '<?php echo addslashes($user['email']); ?>', '<?php echo addslashes($user['type_utilisateur']); ?>', '<?php echo addslashes($user['score']); ?>')" class="btn btn-secondary">
+<!-- Bouton pour ouvrir le modal -->
+<a href="javascript:void(0);" 
+   onclick="openEditModal(
+       <?php echo $user->getId(); ?>, 
+       '<?php echo htmlspecialchars($user->getNomUtilisateur(), ENT_QUOTES); ?>', 
+       '<?php echo htmlspecialchars($user->getEmail(), ENT_QUOTES); ?>', 
+       '<?php echo htmlspecialchars($user->getTypeUtilisateur(), ENT_QUOTES); ?>', 
+       '<?php echo htmlspecialchars($user->getScore(), ENT_QUOTES); ?>'
+   )" 
+   class="btn btn-secondary">
     <i class="fas fa-edit"></i> Edit
 </a>
 <script>
@@ -548,7 +575,7 @@ $users = getAllUsers($pdo);
 
     
     <!-- Delete button -->
-    <button type="button" class="btn btn-danger delete-user" id="supprimer" data-id="<?php echo $user['artiste_id']; ?>">
+    <button type="button" class="btn btn-danger delete-user" id="supprimer" data-id="<?php echo $user->getId(); ?>">
         <i class="fas fa-trash"></i> Delete
     </button>
 </td>
@@ -580,7 +607,10 @@ $users = getAllUsers($pdo);
 
         <!-- Settings Tab -->
         <?php
-$imagePath = !empty($user['image_path']) ? '/projetweb/pages/tunify_avec_connexion/' . htmlspecialchars($user['image_path']) : 'default.jpg';
+// Get image path using object method
+$imagePath = (!empty($userConnected->getImagePath())) 
+    ? '/projetweb/View/pages/tunify_avec_connexion/' . htmlspecialchars($userConnected->getImagePath())
+    : '/projetweb/assets/img/default.jpg'; // Ensure default image path is correct
 ?>
 
 <div id="settings" class="tab-content">
@@ -590,29 +620,39 @@ $imagePath = !empty($user['image_path']) ? '/projetweb/pages/tunify_avec_connexi
         </div>
 
         <form action="update_settings.php" method="POST" enctype="multipart/form-data" style="margin-top: 20px;">
-            <input type="hidden" name="id" value="<?php echo htmlspecialchars($user['artiste_id']); ?>">
+            <input type="hidden" name="id" value="<?php echo htmlspecialchars($userConnected->getId()); ?>">
 
             <div class="form-group">
                 <label>Profile Picture</label><br>
-                <img src="<?php echo $imagePath; ?>" width="100" height="100" style="border-radius: 50%; margin-bottom: 10px;" alt="Profile Picture">
+                <img src="<?php echo $imagePath; ?>" 
+                     width="100" 
+                     height="100" 
+                     style="border-radius: 50%; margin-bottom: 10px;" 
+                     alt="Profile Picture of <?php echo htmlspecialchars($userConnected->getNomUtilisateur()); ?>">
                 <input type="file" name="profile_image" class="form-control">
             </div>
 
             <div class="form-group">
                 <label>Email Address</label>
-                <input type="email" name="email" class="form-control" value="<?php echo htmlspecialchars($user['email']); ?>" required>
+                <input type="email" 
+                       name="email" 
+                       class="form-control" 
+                       value="<?php echo htmlspecialchars($userConnected->getEmail()); ?>" 
+                       required>
             </div>
 
             <div class="form-group">
                 <label>New Password</label>
-                <input type="password" name="password" class="form-control" placeholder="Leave blank to keep current password">
+                <input type="password" 
+                       name="password" 
+                       class="form-control" 
+                       placeholder="Leave blank to keep current password">
             </div>
 
             <button type="submit" class="btn btn-primary" style="margin-top: 20px;">Save Changes</button>
         </form>
     </div>
 </div>
-
 
     <!-- Add Music Modal -->
     <form action="ajout.php" method="POST" enctype="multipart/form-data" id="song-form">

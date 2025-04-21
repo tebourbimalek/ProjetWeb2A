@@ -3,7 +3,7 @@
 session_start();
 
 // Include the config file
-require_once 'C:\xampp\htdocs\projetweb\includes\config.php';
+require_once 'C:\xampp\htdocs\projetweb\Model\includes\config.php';
 
 // Check if form is submitted
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

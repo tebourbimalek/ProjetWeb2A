@@ -1,18 +1,30 @@
 <?php
 
 require_once 'C:\xampp\htdocs\projetweb\controller\controller.php';
-require_once 'C:\xampp\htdocs\projetweb\includes\config.php';
+require_once 'C:\xampp\htdocs\projetweb\Model\includes\config.php';
+require_once 'C:\xampp\htdocs\projetweb\Model\includes\user.php';
 
 $message = '';
-
 $pdo = config::getConnexion();
+
+if (!$pdo) {
+    die("Database connection failed!");
+}
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email = $_POST['email'] ?? '';
-    $mot_de_passe = $_POST['mot_de_passe'] ?? '';
+    $password = $_POST['mot_de_passe'] ?? '';
 
-    // Appel de la fonction depuis le controller
-    $message = loginUser($pdo, $email, $mot_de_passe);
+    // Debugging
+    error_log("Login attempt with: ".$email." / ".$password);
+    
+    $message = loginUser($pdo, $email, $password);
+    
+    // If login succeeded
+    if (isset($_SESSION['user'])) {
+        error_log("Login successful, redirecting...");
+        exit; // Ensure no further output
+    }
 }
 ?>
 

@@ -3,9 +3,9 @@
 session_start();
 
 // Include the database configuration
-require_once 'C:\xampp\htdocs\projetweb\includes\config.php';
-require_once 'C:\xampp\htdocs\projetweb\includes\function.php';
-require_once 'C:\xampp\htdocs\projetweb\includes\classe.php'; 
+require_once 'C:\xampp\htdocs\projetweb\Model\includes\config.php';
+require_once 'C:\xampp\htdocs\projetweb\Model\includes\function.php';
+require_once 'C:\xampp\htdocs\projetweb\Model\includes\classe.php'; 
 
 try {
     // Get database connection

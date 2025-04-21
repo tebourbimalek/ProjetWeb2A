@@ -8,6 +8,6 @@
 <body>
     <h1>⛔ Accès refusé</h1>
     <p>Vous n'avez pas les autorisations nécessaires pour accéder à cette page.</p>
-    <a href="/projetweb/pages/tunisfy_sans_conexion/login.php">Retour à login</a>
+    <a href="/projetweb/View/pages/tunisfy_sans_conexion/login.php">Retour à login</a>
 </body>
 </html>

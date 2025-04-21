@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once 'C:\xampp\htdocs\projetweb\includes\config.php';
+require_once 'C:\xampp\htdocs\projetweb\Model\includes\config.php';
 
 // Vérifier si l'utilisateur est connecté
 if (!isset($_SESSION['user'])) {

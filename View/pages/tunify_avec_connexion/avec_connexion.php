@@ -4,7 +4,7 @@
 require_once 'C:\xampp\htdocs\projetweb\controller\controller.php';
 
 // Include the config file to reuse the database connection
-require_once 'C:\xampp\htdocs\projetweb\includes\config.php';
+require_once 'C:\xampp\htdocs\projetweb\Model\includes\config.php';
 
 // Get a PDO instance from the config class
 $pdo = config::getConnexion();
@@ -13,10 +13,10 @@ $pdo = config::getConnexion();
 $user = getUserInfo($pdo);
 
 // Ensuite, tu peux afficher les données :
-echo "Bienvenue " . htmlspecialchars($user['nom_utilisateur']) . " !<br>";
-echo "Email : " . htmlspecialchars($user['email']) . "<br>";
-echo "Score : " . htmlspecialchars($user['score']) . "<br>";
-echo "Type : " . htmlspecialchars($user['type_utilisateur']) . "<br>";
+echo "Bienvenue " . htmlspecialchars($user->getNomUtilisateur()) . " !<br>";
+echo "Email : " . htmlspecialchars($user->getEmail()) . "<br>";
+echo "Score : " . htmlspecialchars($user->getScore()) . "<br>";
+echo "Type : " . htmlspecialchars($user->getTypeUtilisateur()) . "<br>";
 
 
 require_once 'displaysongs.php';
@@ -46,7 +46,7 @@ session_start();
 
 // Redirection si l'utilisateur n'est pas connecté
 if (!isset($_SESSION['user'])) {
-    header("Location: /projetweb/pages/tunisfy_sans_conexion/page_sans_connexion.php");
+    header("Location: /projetweb/View/pages/tunisfy_sans_conexion/page_sans_connexion.php");
     exit;
 }
 ?>
@@ -70,7 +70,7 @@ if (!isset($_SESSION['user'])) {
             <img src="/projetweb/assets/img/logo.png" alt="Logo" class="logo">
             <div class="icon-container">
                 <div class="icon-house">
-                    <a href="/projetweb/pages/tunify_avec_connexion/avec_connexion.php"><i class="fa-solid fa-house" style="color: grey;font-size:20px;"></i></a>
+                    <a href="/projetweb/View/pages/tunify_avec_connexion/avec_connexion.php"><i class="fa-solid fa-house" style="color: grey;font-size:20px;"></i></a>
                 </div>
                 <span class="tooltip">Accueil</span>
             </div>
@@ -239,8 +239,8 @@ form button:hover {
             </div>
         </div>
     <?php else: ?>
-        <a href="/projetweb/pages/tunisfy_sans_conexion/login.php" class="nav-link">Se connecter</a>
-        <a href="/projetweb/pages/tunisfy_sans_conexion/register.php" class="nav-link">S'inscrire</a>
+        <a href="/projetweb/View/pages/tunisfy_sans_conexion/login.php" class="nav-link">Se connecter</a>
+        <a href="/projetweb/View/pages/tunisfy_sans_conexion/register.php" class="nav-link">S'inscrire</a>
     <?php endif; ?>
 </div>
 
@@ -249,34 +249,36 @@ form button:hover {
 <div id="profileModal" class="modal">
     <div class="modal-content">
         <span class="close" onclick="closeModal()">&times;</span>
-
         <h3>Your Profile</h3>
 
         <!-- Affichage de la photo actuelle -->
-        <?php if (!empty($user['image_path'])): ?>
+        <?php if (!empty($user->getImagePath())): ?>
             <div class="form-group" style="text-align: center;">
-                <img src="<?php echo htmlspecialchars($user['image_path']); ?>" alt="Profile Image" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; margin-bottom: 10px;">
+                <img src="<?php echo htmlspecialchars($user->getImagePath()); ?>" alt="Profile Image" 
+                     style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; margin-bottom: 10px;">
             </div>
         <?php endif; ?>
 
         <form action="update_profile.php" method="POST" enctype="multipart/form-data">
-            <input type="hidden" name="id" value="<?php echo htmlspecialchars($user['artiste_id']); ?>">
+            <input type="hidden" name="id" value="<?php echo htmlspecialchars($user->getId()); ?>">
 
             <div class="form-group">
                 <label for="name">Full Name</label>
-                <input type="text" class="form-control" name="name" value="<?php echo htmlspecialchars($user['nom_utilisateur']); ?>" required>
+                <input type="text" class="form-control" name="name" 
+                       value="<?php echo htmlspecialchars($user->getNomUtilisateur()); ?>" required>
             </div>
 
             <div class="form-group">
                 <label for="email">Email</label>
-                <input type="email" class="form-control" name="email" value="<?php echo htmlspecialchars($user['email']); ?>" required>
+                <input type="email" class="form-control" name="email" 
+                       value="<?php echo htmlspecialchars($user->getEmail()); ?>" required>
             </div>
 
             <div class="form-group">
                 <label for="status">Status</label>
                 <select class="form-control" name="status" required>
-                    <option value="Active" <?php echo $user['score'] === 'Active' ? 'selected' : ''; ?>>Active</option>
-                    <option value="Inactive" <?php echo $user['score'] === 'Inactive' ? 'selected' : ''; ?>>Inactive</option>
+                    <option value="Active" <?php echo $user->getScore() === 'Active' ? 'selected' : ''; ?>>Active</option>
+                    <option value="Inactive" <?php echo $user->getScore() === 'Inactive' ? 'selected' : ''; ?>>Inactive</option>
                 </select>
             </div>
 
@@ -289,7 +291,6 @@ form button:hover {
         </form>
     </div>
 </div>
-
 
 
 <script>
