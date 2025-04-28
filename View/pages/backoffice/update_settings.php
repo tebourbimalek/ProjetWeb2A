@@ -1,5 +1,5 @@
 <?php
-
+session_start();
 require_once 'C:\xampp\htdocs\projetweb\Model\includes\config.php';
 require_once 'C:\xampp\htdocs\projetweb\Model\controller\controller.php';
 

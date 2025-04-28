@@ -1,4 +1,5 @@
 <?php 
+session_start();
 // Start the session
 
 require_once 'C:\xampp\htdocs\projetweb\controller\controller.php';
@@ -42,13 +43,11 @@ if (isset($_GET['next'])) {
     </script>";
 
 }
-session_start();
+
 
 // Redirection si l'utilisateur n'est pas connecté
-if (!isset($_SESSION['user'])) {
-    header("Location: /projetweb/View/pages/tunisfy_sans_conexion/page_sans_connexion.php");
-    exit;
-}
+requireLogin();
+
 ?>
 
 
@@ -99,7 +98,7 @@ if (!isset($_SESSION['user'])) {
         border: none;
         cursor: pointer;
         font-size: 20px;
-        color: #333;
+        color: #fff;
         padding: 10px;
     }
 
@@ -107,124 +106,36 @@ if (!isset($_SESSION['user'])) {
         display: none;
         position: absolute;
         right: 0;
-        background-color: white;
-        min-width: 180px;
-        box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        background-color: #222;
+        min-width: 220px;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.4);
         z-index: 999;
-        border-radius: 5px;
         overflow: hidden;
     }
 
     .dropdown-menu a {
-        color: black;
-        padding: 12px 16px;
+        color: #fff;
+        padding: 16px;
         text-decoration: none;
         display: block;
+        font-weight: 500;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
     }
 
     .dropdown-menu a:hover {
-        background-color: #f1f1f1;
+        background-color: rgba(255,255,255,0.05);
+    }
+
+    .external-link {
+        float: right;
+        opacity: 0.7;
     }
 
     .show {
         display: block;
     }
-
-/* Modal styles */
-.modal {
-    display: none; /* Hidden by default */
-    position: fixed;
-    z-index: 1;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.6); /* Dark background */
-    color: #fff;
-    font-family: Arial, sans-serif;
-}
-
-.modal-content {
-    background-color: #1e1e1e; /* Dark background */
-    margin: 10% auto;
-    padding: 20px;
-    width: 80%;
-    max-width: 600px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.5);
-    color: #fff;
-}
-
-.close {
-    color: #aaa;
-    font-size: 30px;
-    font-weight: bold;
-    position: absolute;
-    top: 15px;
-    right: 20px;
-}
-
-.close:hover,
-.close:focus {
-    color: #fff;
-    text-decoration: none;
-    cursor: pointer;
-}
-
-h2, h3 {
-    text-align: center;
-    font-size: 28px;
-    margin-bottom: 20px;
-}
-
-form input,
-form select {
-    width: 100%;
-    padding: 12px;
-    margin-bottom: 20px;
-    border: none;
-    border-radius: 5px;
-    background-color: #333;
-    color: #fff;
-}
-
-form label {
-    font-weight: bold;
-    display: block;
-    margin-bottom: 5px;
-}
-
-form button {
-    width: 100%;
-    padding: 12px;
-    background-color: #1db954;
-    border: none;
-    border-radius: 5px;
-    color: white;
-    font-weight: bold;
-    cursor: pointer;
-    margin-bottom: 15px;
-}
-
-form button:hover {
-    background-color: #1ed760;
-}
-
-.user-info img {
-    max-width: 150px;
-    border-radius: 50%;
-    display: block;
-    margin: 20px auto;
-}
-
-.user-info p {
-    margin-bottom: 10px;
-}
-
-
-
-
 </style>
+
 <div class="right-section">
     <?php if (isset($_SESSION['user'])): ?>
         <div class="dropdown">
@@ -232,10 +143,13 @@ form button:hover {
                 <i class="fas fa-user"></i>
             </button>
             <div id="dropdownMenu" class="dropdown-menu">
-                <a href="#"><i class="fas fa-crown"></i> Premium</a>
-                <a href="#" onclick="openModal()"><i class="fas fa-user"></i> Profil</a>
-                <a href="settings.php"><i class="fas fa-cogs"></i> Settings</a>
-                <a href="logout.php"><i class="fas fa-sign-out-alt"></i> Déconnexion</a>
+                <a href="/projetweb/View/pages/tunify_avec_connexion/account/overview.php" target="_blank">Account <i class="fas fa-external-link-alt external-link"></i></a>
+                <a href="#profile" onclick="openProfileSection()">Profile</a>
+                <a href="#premium">Upgrade to Premium <i class="fas fa-external-link-alt external-link"></i></a>
+                <a href="#support">Support <i class="fas fa-external-link-alt external-link"></i></a>
+                <a href="#download">Download <i class="fas fa-external-link-alt external-link"></i></a>
+                <a href="#" onclick="showSettingsSection(); return false;">Settings</a>
+                <a href="logout.php">Log out</a>
             </div>
         </div>
     <?php else: ?>
@@ -244,88 +158,6 @@ form button:hover {
     <?php endif; ?>
 </div>
 
-
-<!-- Modal -->
-<div id="profileModal" class="modal">
-    <div class="modal-content">
-        <span class="close" onclick="closeModal()">&times;</span>
-        <h3>Your Profile</h3>
-
-        <!-- Affichage de la photo actuelle -->
-        <?php if (!empty($user->getImagePath())): ?>
-            <div class="form-group" style="text-align: center;">
-                <img src="<?php echo htmlspecialchars($user->getImagePath()); ?>" alt="Profile Image" 
-                     style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; margin-bottom: 10px;">
-            </div>
-        <?php endif; ?>
-
-        <form action="update_profile.php" method="POST" enctype="multipart/form-data">
-            <input type="hidden" name="id" value="<?php echo htmlspecialchars($user->getId()); ?>">
-
-            <div class="form-group">
-                <label for="name">Full Name</label>
-                <input type="text" class="form-control" name="name" 
-                       value="<?php echo htmlspecialchars($user->getNomUtilisateur()); ?>" required>
-            </div>
-
-            <div class="form-group">
-                <label for="email">Email</label>
-                <input type="email" class="form-control" name="email" 
-                       value="<?php echo htmlspecialchars($user->getEmail()); ?>" required>
-            </div>
-
-            <div class="form-group">
-                <label for="status">Status</label>
-                <select class="form-control" name="status" required>
-                    <option value="Active" <?php echo $user->getScore() === 'Active' ? 'selected' : ''; ?>>Active</option>
-                    <option value="Inactive" <?php echo $user->getScore() === 'Inactive' ? 'selected' : ''; ?>>Inactive</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="profile_image">Profile Image</label>
-                <input type="file" class="form-control" name="profile_image" accept="image/*">
-            </div>
-
-            <button type="submit" class="btn">Save Changes</button>
-        </form>
-    </div>
-</div>
-
-
-<script>
-    function toggleDropdown() {
-        document.getElementById("dropdownMenu").classList.toggle("show");
-    }
-
-    // Fermer le menu si on clique en dehors
-    window.onclick = function(event) {
-        if (!event.target.closest('.dropdown')) {
-            const menu = document.getElementById("dropdownMenu");
-            if (menu.classList.contains('show')) {
-                menu.classList.remove('show');
-            }
-        }
-    };
-
-
-       // Open the modal when "Profil" is clicked
-       function openModal() {
-        document.getElementById('profileModal').style.display = 'block';
-    }
-
-    // Close the modal
-    function closeModal() {
-        document.getElementById('profileModal').style.display = 'none';
-    }
-
-    // Close the modal if clicked outside of the modal content
-    window.onclick = function(event) {
-        if (event.target == document.getElementById('profileModal')) {
-            closeModal();
-        }
-    }
-</script>
     </nav>
     <div class="main-content">
         <div>
@@ -458,6 +290,904 @@ form button:hover {
                 </footer>
                 </div>
             </div>
+
+
+            <!-- Add this inside your box-2 container -->
+            <div class="box-2" id="profileSection" style="display: none;">
+    <!-- Profile Header -->
+    <div class="profile-header">
+        <div class="profile-info">
+            <!-- Profile Image -->
+            <?php if (!empty($user->getImagePath())): ?>
+                <div class="profile-image-container">
+                    <div class="profile-image">
+                        <img src="<?= htmlspecialchars($user->getImagePath()) . '?v=' . time() ?>" class="profile-avatar" alt="Profile Picture">
+                    </div>
+                    <!-- Add three dots menu button -->
+                    <div class="profile-options">
+                        <button class="options-button" onclick="toggleProfileMenu()">•••</button>
+                        <!-- Dropdown menu -->
+                        <div id="profileMenu" class="profile-dropdown" style="display: none;">
+                            <div class="dropdown-item" onclick="openEditProfileModal()">
+                                <span class="icon">✎</span> Edit profile
+                            </div>
+                            <div class="dropdown-item" onclick="copyProfileLink()">
+                                <span class="icon">⧉</span> Copy link to profile
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Hidden file input and form -->
+                <form id="uploadForm" method="POST" enctype="multipart/form-data" action="update_profile_picture.php">
+                    <input type="file" name="profile_image" id="profileUpload" style="display: none;" onchange="uploadProfileImage()">
+                    <input type="hidden" name="id" value="<?= htmlspecialchars($user->getArtisteId()) ?>">
+                </form>
+            <?php endif; ?>
+            
+            <div class="profile-meta">
+                <h1 class="profile-name"><?= htmlspecialchars($user->getNomUtilisateur()) ?></h1>
+                <div class="profile-stats">
+                    <span class="stat-item">• 6 Following</span>
+                </div>
+            </div>
+        </div>
+        <button class="back-button" onclick="closeProfileSection()">← Back</button>
+    </div>
+
+    <!-- Following Grid -->
+    <div class="following-section">
+        <h2 class="section-title">Following</h2>
+        <div class="following-grid">
+            <!-- Artist 1: A.L.A -->
+            <div class="artist-card">
+                <div class="artist-image">
+                 <img src="\projetweb\assets\includes\ALA.jpeg" alt="A.L.A">
+                </div>
+                <div class="artist-info">
+                    <h3 class="artist-name">A.L.A</h3>
+                    <p class="artist-type">Artist</p>
+                </div>
+            </div>
+            
+            <!-- Artist 2: Eminem -->
+            <div class="artist-card">
+                <div class="artist-image">
+                    <img src="\projetweb\assets\includes\kaso.jpeg" alt="Kaso">
+                </div>
+                <div class="artist-info">
+                    <h3 class="artist-name">Kaso</h3>
+                    <p class="artist-type">Artist</p>
+                </div>
+            </div>
+            
+            <!-- Artist 3: Kendrick Lamar -->
+            <div class="artist-card">
+                <div class="artist-image">
+                    <img src="\projetweb\assets\includes\gga.jpeg" alt="GGA">
+                </div>
+                <div class="artist-info">
+                    <h3 class="artist-name">GGA</h3>
+                    <p class="artist-type">Artist</p>
+                </div>
+            </div>
+            
+            <!-- Artist 4: Lana Del Rey -->
+            <div class="artist-card">
+                <div class="artist-image">
+                    <img src="\projetweb\assets\includes\balti.jpeg" alt="Balti">
+                </div>
+                <div class="artist-info">
+                    <h3 class="artist-name">Balti</h3>
+                    <p class="artist-type">Artist</p>
+                </div>
+            </div>
+            
+            <!-- Artist 5: Samara -->
+            <div class="artist-card">
+                <div class="artist-image">
+                    <img src="\projetweb\assets\includes\samara.jpeg" alt="Samara">
+                </div>
+                <div class="artist-info">
+                    <h3 class="artist-name">Samara</h3>
+                    <p class="artist-type">Artist</p>
+                </div>
+            </div>
+            
+            <!-- Artist 6: The Weeknd -->
+            <div class="artist-card">
+                <div class="artist-image">
+                    <img src="\projetweb\assets\includes\stou.jpeg" alt="Stou">
+                </div>
+                <div class="artist-info">
+                    <h3 class="artist-name">Stou</h3>
+                    <p class="artist-type">Artist</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Links -->
+    <div class="footer-links">
+        <div class="footer-section">
+            <h3 class="footer-title">Company</h3>
+            <ul class="footer-list">
+                <li>About</li>
+                <li>Jobs</li>
+                <li>For the Record</li>
+            </ul>
+        </div>
+
+        <div class="footer-section">
+            <h3 class="footer-title">Communities</h3>
+            <ul class="footer-list">
+                <li>For Artists</li>
+                <li>Developers</li>
+                <li>Advertising</li>
+                <li>Investors</li>
+                <li>Vendors</li>
+            </ul>
+        </div>
+
+        <div class="footer-section">
+            <h3 class="footer-title">Useful links</h3>
+            <ul class="footer-list">
+                <li>Support</li>
+                <li>Free Mobile App</li>
+            </ul>
+        </div>
+
+        <div class="footer-section">
+            <h3 class="footer-title">Tunify Plans</h3>
+            <ul class="footer-list">
+                <li>Premium Individual</li>
+                <li>Premium Duo</li>
+                <li>Premium Family</li>
+                <li>Tunify Free</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Social Links -->
+    <div class="social-links">
+        <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+        <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+        <a href="#" class="social-icon"><i class="fab fa-facebook"></i></a>
+    </div>
+
+    <!-- Legal Footer -->
+    <div class="profile-legal">
+        <div class="legal-links">
+            <a href="#">Legal</a>
+            <a href="#">Safety & Privacy Center</a>
+            <a href="#">Privacy Policy</a>
+            <a href="#">Cookies</a>
+            <a href="#">About Ads</a>
+            <a href="#">Accessibility</a>
+        </div>
+        <div class="copyright">© 2025 Tunify AB</div>
+    </div>
+</div>
+
+<!-- Settings Section -->
+<div class="box-2" id="settingsSection" style="display: none;">
+    <div class="settings-header">
+        <h1>Settings</h1>
+        <div class="search-icon">
+            <i class="fas fa-search"></i>
+        </div>
+    </div>
+
+    <!-- Account Settings -->
+    <div class="settings-group">
+        <h2 class="settings-category">Account</h2>
+        <div class="settings-item">
+            <div class="setting-info">
+                <span class="setting-label">Edit login methods</span>
+            </div>
+            <div class="setting-action">
+                <button class="edit-button">Edit <i class="fas fa-external-link-alt"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Language Settings -->
+    <div class="settings-group">
+        <h2 class="settings-category">Language</h2>
+        <div class="settings-item">
+            <div class="setting-info">
+                <span class="setting-label">Choose language - Changes will be applied after restarting the app</span>
+            </div>
+            <div class="setting-action">
+                <div class="dropdown-select">
+                    <select>
+                        <option selected>English (English)</option>
+                        <option>Français (French)</option>
+                        <option>Español (Spanish)</option>
+                        <option>العربية (Arabic)</option>
+                    </select>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Library Settings -->
+    <div class="settings-group">
+        <h2 class="settings-category">Your Library</h2>
+        <div class="settings-item">
+            <div class="setting-info">
+                <span class="setting-label">Use compact library layout</span>
+            </div>
+            <div class="setting-action">
+                <label class="toggle-switch">
+                    <input type="checkbox">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Display Settings -->
+    <div class="settings-group">
+        <h2 class="settings-category">Display</h2>
+        <div class="settings-item">
+            <div class="setting-info">
+                <span class="setting-label">Show the now-playing panel on click of play</span>
+            </div>
+            <div class="setting-action">
+                <label class="toggle-switch">
+                    <input type="checkbox" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+        </div>
+        <div class="settings-item">
+            <div class="setting-info">
+                <span class="setting-label">Display short, looping visuals on tracks (Canvas)</span>
+            </div>
+            <div class="setting-action">
+                <label class="toggle-switch">
+                    <input type="checkbox" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Social Settings -->
+    <div class="settings-group">
+        <h2 class="settings-category">Social</h2>
+        <div class="settings-item">
+            <div class="setting-info">
+                <span class="setting-label">Show my follower and following lists on my public profile</span>
+            </div>
+            <div class="setting-action">
+                <label class="toggle-switch">
+                    <input type="checkbox" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Links -->
+    <div class="footer-links">
+        <div class="footer-section">
+            <h3 class="footer-title">Company</h3>
+            <ul class="footer-list">
+                <li>About</li>
+                <li>Jobs</li>
+                <li>For the Record</li>
+            </ul>
+        </div>
+
+        <div class="footer-section">
+            <h3 class="footer-title">Communities</h3>
+            <ul class="footer-list">
+                <li>For Artists</li>
+                <li>Developers</li>
+                <li>Advertising</li>
+                <li>Investors</li>
+                <li>Vendors</li>
+            </ul>
+        </div>
+
+        <div class="footer-section">
+            <h3 class="footer-title">Useful links</h3>
+            <ul class="footer-list">
+                <li>Support</li>
+                <li>Free Mobile App</li>
+            </ul>
+        </div>
+
+        <div class="footer-section">
+            <h3 class="footer-title">Tunify Plans</h3>
+            <ul class="footer-list">
+                <li>Premium Individual</li>
+                <li>Premium Duo</li>
+                <li>Premium Family</li>
+                <li>Tunify Free</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Social Links -->
+    <div class="social-links">
+        <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+        <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+        <a href="#" class="social-icon"><i class="fab fa-facebook"></i></a>
+    </div>
+
+    <!-- Legal Footer -->
+    <div class="settings-legal">
+        <div class="legal-links">
+            <a href="#">Legal</a>
+            <a href="#">Safety & Privacy Center</a>
+            <a href="#">Privacy Policy</a>
+            <a href="#">Cookies</a>
+            <a href="#">About Ads</a>
+            <a href="#">Accessibility</a>
+        </div>
+        <div class="copyright">© 2025 Tunify AB</div>
+    </div>
+</div>
+
+<style>
+/* Profile Section Styles */
+.profile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding: 20px 0;
+    border-bottom: 1px solid #282828;
+}
+
+.profile-info {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+}
+.profile-image {
+    position: relative;
+    cursor: pointer;
+}
+
+.profile-image-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.profile-image:hover .profile-image-overlay {
+    opacity: 1;
+}
+
+.profile-image-overlay span {
+    color: white;
+    font-size: 14px;
+    font-weight: 500;
+    text-align: center;
+    padding: 0 10px;
+}
+
+/* Notification styles */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 20px;
+    border-radius: 4px;
+    color: white;
+    font-size: 14px;
+    max-width: 300px;
+    z-index: 1000;
+    transform: translateX(120%);
+    transition: transform 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.notification.show {
+    transform: translateX(0);
+}
+
+.notification.success {
+    background-color: #1DB954;
+}
+
+.notification.error {
+    background-color: #E61E32;
+}
+.profile-avatar {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.profile-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.profile-name {
+    color: #fff;
+    font-size: 48px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.profile-stats {
+    display: flex;
+    gap: 20px;
+    color: #b3b3b3;
+    font-size: 16px;
+}
+
+.back-button {
+    background: transparent;
+    color: #fff;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 8px 16px;
+    border-radius: 20px;
+    transition: background-color 0.2s;
+}
+
+.back-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Following Grid */
+.following-section {
+    margin: 40px 0;
+}
+
+.section-title {
+    color: #fff;
+    font-size: 24px;
+    margin-bottom: 25px;
+}
+
+.following-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 20px;
+}
+
+.artist-card {
+    background: #181818;
+    border-radius: 8px;
+    padding: 15px;
+    transition: background-color 0.3s;
+    cursor: pointer;
+}
+
+.artist-card:hover {
+    background: #282828;
+}
+
+.artist-image {
+    position: relative;
+    margin-bottom: 15px;
+}
+
+.artist-image img {
+    width: 100%;
+    aspect-ratio: 1/1;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.artist-info {
+    text-align: center;
+}
+
+.artist-name {
+    color: #fff;
+    font-size: 16px;
+    margin: 5px 0;
+    font-weight: 500;
+}
+
+.artist-type {
+    color: #b3b3b3;
+    font-size: 14px;
+    margin: 0;
+}
+
+/* Footer Links */
+.footer-links {
+    display: flex;
+    justify-content: space-between;
+    margin: 60px 0 30px;
+    padding-top: 30px;
+    border-top: 1px solid #282828;
+}
+
+.footer-section {
+    flex: 1;
+    max-width: 200px;
+}
+
+.footer-title {
+    color: #fff;
+    font-size: 16px;
+    margin-bottom: 20px;
+    font-weight: 500;
+}
+
+.footer-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.footer-list li {
+    color: #a7a7a7;
+    margin-bottom: 12px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.footer-list li:hover {
+    color: #fff;
+}
+
+/* Social Links */
+.social-links {
+    display: flex;
+    gap: 16px;
+    margin: 30px 0;
+}
+
+.social-icon {
+    background: #292929;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    transition: background-color 0.2s;
+}
+
+.social-icon:hover {
+    background: #333;
+}
+
+/* Legal Footer */
+.profile-legal {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #282828;
+}
+
+.legal-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 15px;
+}
+
+.legal-links a {
+    color: #a7a7a7;
+    text-decoration: none;
+    font-size: 12px;
+    transition: color 0.2s;
+}
+
+.legal-links a:hover {
+    color: #fff;
+}
+
+.copyright {
+    color: #a7a7a7;
+    font-size: 12px;
+    margin-top: 20px;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .following-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+    
+    .footer-links {
+        flex-wrap: wrap;
+        gap: 30px;
+    }
+}
+
+@media (max-width: 768px) {
+    .profile-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 20px;
+    }
+    
+    .following-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .footer-links {
+        flex-direction: column;
+        gap: 40px;
+    }
+    
+    .footer-section {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .profile-info {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+    
+    .following-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Settings Section Styles */
+.settings-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 0;
+    margin-bottom: 20px;
+}
+
+.settings-header h1 {
+    font-size: 32px;
+    font-weight: 700;
+    color: #fff;
+    margin: 0;
+}
+
+.search-icon {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.1);
+    cursor: pointer;
+}
+
+.search-icon i {
+    color: #fff;
+    font-size: 16px;
+}
+
+.settings-group {
+    margin-bottom: 40px;
+}
+
+.settings-category {
+    font-size: 18px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 20px;
+}
+
+.settings-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.setting-label {
+    font-size: 14px;
+    color: #fff;
+}
+
+.edit-button {
+    background-color: transparent;
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.2s;
+    display: flex;
+    align-items: center;
+}
+
+.edit-button i {
+    margin-left: 5px;
+}
+
+.edit-button:hover {
+    transform: scale(1.05);
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Dropdown Select */
+.dropdown-select {
+    position: relative;
+    width: 240px;
+}
+
+.dropdown-select select {
+    width: 100%;
+    background-color: #333;
+    color: #fff;
+    padding: 12px 16px;
+    border: none;
+    border-radius: 4px;
+    appearance: none;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.dropdown-select i {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #fff;
+    pointer-events: none;
+}
+
+/* Toggle Switch */
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 46px;
+    height: 24px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #535353;
+    transition: 0.4s;
+    border-radius: 24px;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+}
+
+input:checked + .toggle-slider {
+    background-color: #1DB954;
+}
+
+input:checked + .toggle-slider:before {
+    transform: translateX(22px);
+}
+
+/* Footer styling for Settings */
+.settings-legal {
+    border-top: 1px solid #333;
+    padding-top: 20px;
+    margin-top: 30px;
+}
+
+.legal-links {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.legal-links a {
+    color: #aaa;
+    text-decoration: none;
+    font-size: 12px;
+    margin-right: 20px;
+    margin-bottom: 10px;
+}
+
+.legal-links a:hover {
+    color: #fff;
+    text-decoration: underline;
+}
+
+.copyright {
+    color: #aaa;
+    font-size: 12px;
+}
+</style>
+
+<script>
+   function uploadProfileImage() {
+    const form = document.getElementById('uploadForm');
+    const fileInput = document.getElementById('profileUpload');
+
+    if (fileInput && fileInput.files.length > 0) {
+        form.submit();
+    } else {
+        alert("Veuillez sélectionner une image avant de soumettre.");
+    }
+}
+
+
+// Profile Toggle Functions
+function openProfileSection() {
+    document.getElementById('box2-main').style.display = 'none';
+    document.getElementById('settingsSection').style.display = 'none';
+    document.getElementById('profileSection').style.display = 'block';
+    window.scrollTo(0, 0);
+}
+
+function closeProfileSection() {
+    document.getElementById('profileSection').style.display = 'none';
+    document.getElementById('box2-main').style.display = 'block';
+}
+
+function toggleDropdown() {
+        document.getElementById("dropdownMenu").classList.toggle("show");
+    }
+
+    // Close the dropdown if the user clicks outside of it
+    window.onclick = function(event) {
+        if (!event.target.matches('.dropdown-button') && !event.target.matches('.dropdown-button *')) {
+            var dropdowns = document.getElementsByClassName("dropdown-menu");
+            for (var i = 0; i < dropdowns.length; i++) {
+                var openDropdown = dropdowns[i];
+                if (openDropdown.classList.contains('show')) {
+                    openDropdown.classList.remove('show');
+                }
+            }
+        }
+    }
+
+// Function to show settings section
+function showSettingsSection() {
+    // Hide other sections
+    document.getElementById('profileSection').style.display = 'none';
+    // Show settings section
+    document.getElementById('settingsSection').style.display = 'block';
+    document.getElementById('box2-main').style.display = 'none';
+}
+
+// Function to hide settings section
+function closeSettingsSection() {
+    document.getElementById('settingsSection').style.display = 'none';
+    // You can show another section or main content here
+}
+</script>
             <div class="box-2" id="box2-expanded2">
                 <div class="section_title">
                     <span id="tendance">Recommandés pour vous</span>
@@ -774,7 +1504,279 @@ form button:hover {
         <audio id="audioPlayer"></audio>
         </div>
 
-      
+
+           <!-- Edit Profile Modal -->
+    <div id="editProfileModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Profile details</h2>
+                <span class="close-button" onclick="closeEditProfileModal()">×</span>
+            </div>
+            <div class="modal-body">
+                <div class="profile-image-upload" onclick="document.getElementById('profileUpload').click();">
+                    <?php if (!empty($user->getImagePath())): ?>
+                        <img src="<?= htmlspecialchars($user->getImagePath()) . '?v=' . time() ?>" alt="Profile Picture">
+                    <?php else: ?>
+                        <div class="placeholder-image">
+                            <!-- User icon placeholder -->
+                        </div>
+                    <?php endif; ?>
+                </div>
+                
+                <div class="profile-input-field">
+                    <input type="text" id="username" value="<?= htmlspecialchars($user->getNomUtilisateur()) ?>">
+                </div>
+                
+                <div class="disclaimer">
+                    <p>By proceeding, you agree to give Spotify access to the image you choose to upload. Please make sure you have the right to upload the image.</p>
+                </div>
+                
+                <div class="modal-actions">
+                    <button class="save-button" onclick="saveProfileChanges()">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function toggleProfileMenu() {
+        const menu = document.getElementById('profileMenu');
+        menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+    }
+    
+    function openEditProfileModal() {
+        document.getElementById('editProfileModal').style.display = 'block';
+        document.getElementById('profileMenu').style.display = 'none';
+    }
+    
+    function closeEditProfileModal() {
+        document.getElementById('editProfileModal').style.display = 'none';
+    }
+    
+    function copyProfileLink() {
+        // Get user ID or username for the profile link
+        const userId = '<?= htmlspecialchars($user->getArtisteId()) ?>';
+        const profileLink = `${window.location.origin}/profile/${userId}`;
+        
+        // Copy to clipboard
+        navigator.clipboard.writeText(profileLink)
+            .then(() => {
+                alert('Profile link copied to clipboard!');
+            })
+            .catch(err => {
+                console.error('Failed to copy: ', err);
+            });
+        
+        document.getElementById('profileMenu').style.display = 'none';
+    }
+    
+    function uploadProfileImage() {
+        document.getElementById('uploadForm').submit();
+    }
+    
+    function saveProfileChanges() {
+    const newUsername = document.getElementById('username').value;
+    
+    fetch('update_username.php', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: `username=${encodeURIComponent(newUsername)}`
+})
+.then(response => {
+    if (!response.ok) {
+        throw new Error('HTTP error! status: ' + response.status);
+    }
+    return response.text(); // Read response as text
+})
+.then(text => {
+    try {
+        const data = JSON.parse(text); // Attempt to parse JSON
+        if (data.success) {
+            document.querySelector('.profile-name').textContent = newUsername;
+            closeEditProfileModal();
+        } else {
+            alert('Failed to update username: ' + data.message);
+        }
+    } catch (error) {
+        console.error('Invalid JSON response:', text);
+        alert('An unexpected error occurred. Please try again later.');
+    }
+})
+.catch(error => {
+    console.error('Error:', error);
+    alert('An error occurred while updating your profile.');
+});
+}
+
+</script>
+<style>
+  /* Profile Options Dropdown */
+.profile-options {
+    position: relative;
+}
+
+.options-button {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+.profile-dropdown {
+    position: absolute;
+    background-color: #282828;
+    min-width: 200px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    border-radius: 4px;
+}
+
+.dropdown-item {
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    color: #fff;
+    cursor: pointer;
+}
+
+.dropdown-item:hover {
+    background-color: #333;
+}
+
+.dropdown-item .icon {
+    margin-right: 10px;
+}
+
+
+/* Modal Styles */
+.modal {
+    position: fixed;
+    z-index: 100;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* Move it down a bit by adding this: */
+    padding-top: 150px;
+    align-items: flex-start;
+}
+
+.modal-content {
+    background-color: #282828;
+    border-radius: 8px;
+    width: 400px;
+    max-width: 90%;
+    color: #fff;
+    position: relative;
+    margin: auto;
+    animation: modalFadeIn 0.3s ease;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+}
+
+@keyframes modalFadeIn {
+    from {opacity: 0; transform: translateY(-20px);}
+    to {opacity: 1; transform: translateY(0);}
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    border-bottom: 1px solid #333;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 20px;
+}
+
+.close-button {
+    cursor: pointer;
+    font-size: 24px;
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.profile-image-upload {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 20px;
+    border-radius: 50%;
+    overflow: hidden;
+    cursor: pointer;
+    background-color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.profile-image-upload img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.placeholder-image {
+    width: 40px;
+    height: 40px;
+    background-image: url('path/to/user-icon.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.profile-input-field {
+    margin-bottom: 20px;
+}
+
+.profile-input-field input {
+    width: 100%;
+    padding: 12px;
+    background-color: #333;
+    border: none;
+    border-radius: 4px;
+    color: #fff;
+    font-size: 16px;
+}
+
+.disclaimer {
+    font-size: 12px;
+    color: #aaa;
+    margin-bottom: 20px;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.save-button {
+    background-color: #fff;
+    color: #000;
+    border: none;
+    border-radius: 20px;
+    padding: 8px 24px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.save-button:hover {
+    background-color: #f0f0f0;
+}
+</style>
+ 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
 <script src="js.js"></script>
 </body>

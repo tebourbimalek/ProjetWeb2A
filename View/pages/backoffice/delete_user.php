@@ -1,4 +1,5 @@
 <?php
+session_start();
 // Start the session
 
 // Include the config file to reuse the database connection

@@ -1,4 +1,5 @@
 <?php
+session_start();
   // Start the session to retrieve data
 
 // Include the necessary files
@@ -106,7 +107,7 @@ try {
             <li data-tab="profile"><i class="fas fa-user"></i> Profile</li>
             <li data-tab="users"><i class="fas fa-users"></i> Users</li>
             <li data-tab="settings"><i class="fas fa-cog"></i> Settings</li>
-            <li><i class="fas fa-sign-out-alt"></i> Logout</li>
+            <li><a href="/projetweb/View/pages/tunify_avec_connexion/logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
         </ul>
     </div>
     
@@ -495,7 +496,7 @@ try {
         <h3>Edit User Information</h3>
         <!-- Formulaire utilisant les méthodes de l'objet User -->
         <form action="update_user.php" method="POST" id="editUserForm">
-            <input type="hidden" name="id" id="userId" value="<?php echo htmlspecialchars($user->getId()); ?>">
+            <input type="hidden" name="id" id="userId" value="<?php echo htmlspecialchars($user->getArtisteId()); ?>">
 
             <div class="form-group">
                 <label for="name">User Name</label>
@@ -537,7 +538,7 @@ try {
 <!-- Bouton pour ouvrir le modal -->
 <a href="javascript:void(0);" 
    onclick="openEditModal(
-       <?php echo $user->getId(); ?>, 
+       <?php echo $user->getArtisteId(); ?>, 
        '<?php echo htmlspecialchars($user->getNomUtilisateur(), ENT_QUOTES); ?>', 
        '<?php echo htmlspecialchars($user->getEmail(), ENT_QUOTES); ?>', 
        '<?php echo htmlspecialchars($user->getTypeUtilisateur(), ENT_QUOTES); ?>', 
@@ -575,7 +576,7 @@ try {
 
     
     <!-- Delete button -->
-    <button type="button" class="btn btn-danger delete-user" id="supprimer" data-id="<?php echo $user->getId(); ?>">
+    <button type="button" class="btn btn-danger delete-user" id="supprimer" data-id="<?php echo $user->getArtisteId(); ?>">
         <i class="fas fa-trash"></i> Delete
     </button>
 </td>
@@ -620,7 +621,7 @@ $imagePath = (!empty($userConnected->getImagePath()))
         </div>
 
         <form action="update_settings.php" method="POST" enctype="multipart/form-data" style="margin-top: 20px;">
-            <input type="hidden" name="id" value="<?php echo htmlspecialchars($userConnected->getId()); ?>">
+            <input type="hidden" name="id" value="<?php echo htmlspecialchars($userConnected->getArtisteId()); ?>">
 
             <div class="form-group">
                 <label>Profile Picture</label><br>

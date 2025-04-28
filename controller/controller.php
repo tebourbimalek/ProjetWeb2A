@@ -3,7 +3,7 @@
 require_once 'C:\xampp\htdocs\projetweb\Model\includes\config.php';
 require_once 'C:\xampp\htdocs\projetweb\Model\includes\user.php';
 
-session_start();
+
 
 function loginUser($pdo, $email, $mot_de_passe) {
     $identifiant = trim($email);
@@ -85,7 +85,7 @@ function registerUser(PDO $pdo, User $user): string {
 
         if ($success) {
             // Mise à jour de l'ID généré
-            $user->setId($pdo->lastInsertId());
+            $user->setArtisteId($pdo->lastInsertId());
             
             // Journalisation (optionnel)
             error_log("Nouvel utilisateur inscrit: " . $user->getEmail());
@@ -103,7 +103,7 @@ function registerUser(PDO $pdo, User $user): string {
 
 function getUserInfo($pdo) {
     if (!isset($_SESSION['user'])) {
-        echo "Vous devez être connecté.";
+        header("Location: /projetweb/View/pages/tunisfy_sans_conexion/page_sans_connexion.php");
         exit;
     }
 
@@ -294,4 +294,17 @@ function updateUserProfile($userId, $name, $email, $status, $imagePath = null) {
     }
 
     return $stmt->execute();
+}
+
+function redirectIfLoggedIn() {
+    if (isset($_SESSION['user'])) {
+        header("Location: /projetweb/View/pages/tunify_avec_connexion/avec_connexion.php");
+        exit;
+    }
+}
+function requireLogin() {
+    if (!isset($_SESSION['user'])) {
+        header("Location: /projetweb/View/pages/tunisfy_sans_conexion/login.php");
+        exit;
+    }
 }

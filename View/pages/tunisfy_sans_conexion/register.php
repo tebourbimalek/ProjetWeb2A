@@ -1,4 +1,5 @@
 <?php
+session_start();
 require_once 'C:\xampp\htdocs\projetweb\controller\controller.php';
 require_once 'C:\xampp\htdocs\projetweb\Model\includes\config.php';
 require_once 'C:\xampp\htdocs\projetweb\Model\includes\user.php';
@@ -36,12 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             // Call controller function with User object
             $message = registerUser($pdo, $user);
             
-            // Optional: Auto-login after registration
-            if(strpos($message, '✅') !== false) {
-                $_SESSION['user'] = $user->getId();
-                header("Location: login.php");
-                exit;
-            }
+
         } catch (Exception $e) {
             $message = "❌ Erreur lors de la création du compte: " . $e->getMessage();
         }

@@ -1,4 +1,5 @@
 <?php 
+require_once 'C:\xampp\htdocs\projetweb\controller\controller.php'; 
 
 require_once 'display.php';
 
@@ -11,6 +12,8 @@ $artistes=artiste();
 
 $allmusic=allmusic();
 $allartiste=allartiste();
+
+redirectIfLoggedIn();
 
 ?>
 
