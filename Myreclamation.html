@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tunify - My Reclamations</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #9b5de5; /* Spotify-like light purple */
+            --primary-dark: #7d3cff;
+            --primary-light: rgba(155, 93, 229, 0.1);
+            --dark: #191414; /* Spotify black */
+            --dark-light: #2d2d2d;
+            --light: #f8f9fa;
+            --text-light: #ffffff;
+            --text-dark: #191414;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Circular', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        body {
+            background-color: var(--dark);
+            color: var(--text-light);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .nav-bar {
+            background-color: rgba(25, 20, 20, 0.8);
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .logo {
+            height: 40px;
+            filter: brightness(0) invert(1);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 2rem;
+            letter-spacing: -0.5px;
+        }
+
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-dark);
+            transform: scale(1.02);
+            box-shadow: 0 5px 15px rgba(155, 93, 229, 0.4);
+        }
+
+        .reclamations-list {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .reclamation-card {
+            background: linear-gradient(145deg, var(--dark-light), var(--dark));
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: var(--transition);
+        }
+
+        .reclamation-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--box-shadow);
+            border-color: var(--primary);
+        }
+
+        .reclamation-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .reclamation-title {
+            font-weight: 600;
+            font-size: 1.2rem;
+            color: var(--primary);
+        }
+
+        .reclamation-date {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+        }
+
+        .status-badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-pending {
+            background-color: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+        }
+
+        .status-resolved {
+            background-color: rgba(40, 167, 69, 0.2);
+            color: #28a745;
+        }
+
+        .reclamation-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .detail-group {
+            margin-bottom: 1rem;
+        }
+
+        .detail-label {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 0.25rem;
+        }
+
+        .detail-value {
+            font-weight: 500;
+        }
+
+        .reclamation-response {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .response-label {
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .no-reclamations {
+            text-align: center;
+            padding: 3rem;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: var(--border-radius);
+            border: 1px dashed rgba(255, 255, 255, 0.2);
+        }
+
+        .screenshot-thumbnail {
+            max-width: 200px;
+            max-height: 150px;
+            border-radius: var(--border-radius);
+            margin-top: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .screenshot-thumbnail:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            max-width: 90%;
+            max-height: 90%;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+        }
+
+        .search-filter {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 250px;
+            padding: 0.8rem 1rem;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: var(--border-radius);
+            color: var(--text-light);
+            font-size: 1rem;
+        }
+
+        .filter-select {
+            padding: 0.8rem 1rem;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: var(--border-radius);
+            color: var(--text-light);
+            font-size: 1rem;
+            min-width: 200px;
+        }
+
+        @media (max-width: 768px) {
+            .reclamation-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 0 1.5rem;
+            }
+            
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            
+            h1 {
+                font-size: 1.7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav-bar">
+        <img src="/view/Tunify.png" alt="Tunify Logo" class="logo" width="50">
+        <div>
+            <a href="reclamation.html" class="btn">
+                <i class="fas fa-plus"></i> New Reclamation
+            </a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1><i class="fas fa-history"></i> My Reclamations</h1>
+            <div class="search-filter">
+                <input type="text" class="search-input" placeholder="Search reclamations..." id="searchInput">
+                <select class="filter-select" id="statusFilter">
+                    <option value="all">All Statuses</option>
+                    <option value="pending">Pending</option>
+                    <option value="resolved">Resolved</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="reclamations-list" id="reclamationsList">
+            <!-- Reclamations will be dynamically inserted here -->
+        </div>
+
+        <div class="no-reclamations" id="noReclamations" style="display: none;">
+            <i class="fas fa-inbox" style="font-size: 3rem; color: var(--primary); margin-bottom: 1rem;"></i>
+            <h3>No Reclamations Found</h3>
+            <p>You haven't submitted any reclamations yet.</p>
+            <a href="reclamation.html" class="btn" style="margin-top: 1.5rem;">
+                <i class="fas fa-plus"></i> Submit Your First Reclamation
+            </a>
+        </div>
+    </div>
+
+    <!-- Modal for image preview -->
+    <div class="modal" id="imageModal">
+        <span class="modal-close" id="modalClose">&times;</span>
+        <img class="modal-content" id="modalImage">
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Sample data - in a real app, this would come from your backend
+            const reclamations = [
+                {
+                    id: 1,
+                    fullName: "John Doe",
+                    email: "john@example.com",
+                    cause: "technical",
+                    description: "The audio playback keeps stuttering on my Android device when streaming high-quality tracks. This happens consistently after about 15 minutes of playback.",
+                    status: "pending",
+                    createdAt: "2025-04-10T14:30:00Z",
+                    updatedAt: "2025-04-10T14:30:00Z",
+                    response: null,
+                    screenshot: "https://example.com/screenshots/audio-issue.jpg"
+                },
+                {
+                    id: 2,
+                    fullName: "John Doe",
+                    email: "john@example.com",
+                    cause: "billing",
+                    description: "I was charged twice for my monthly subscription on April 5th. The charges appear as $9.99 x 2 in my bank statement.",
+                    status: "resolved",
+                    createdAt: "2025-04-05T09:15:00Z",
+                    updatedAt: "2025-04-07T11:20:00Z",
+                    response: "We've investigated the issue and confirmed the double charge. A refund for the second charge has been processed and should appear in your account within 3-5 business days. We apologize for the inconvenience.",
+                    screenshot: null
+                },
+                {
+                    id: 3,
+                    fullName: "John Doe",
+                    email: "john@example.com",
+                    cause: "account",
+                    description: "I can't log in to my account since yesterday. I keep getting 'Invalid credentials' error but I'm sure my password is correct.",
+                    status: "pending",
+                    createdAt: "2025-04-12T18:45:00Z",
+                    updatedAt: "2025-04-12T18:45:00Z",
+                    response: null,
+                    screenshot: "https://example.com/screenshots/login-error.png"
+                }
+            ];
+
+            // Display reclamations
+            function displayReclamations(reclamationsToDisplay) {
+                const reclamationsList = document.getElementById('reclamationsList');
+                const noReclamations = document.getElementById('noReclamations');
+                
+                reclamationsList.innerHTML = '';
+                
+                if (reclamationsToDisplay.length === 0) {
+                    noReclamations.style.display = 'block';
+                    return;
+                }
+                
+                noReclamations.style.display = 'none';
+                
+                reclamationsToDisplay.forEach(reclamation => {
+                    const card = document.createElement('div');
+                    card.className = 'reclamation-card';
+                    
+                    const formattedDate = new Date(reclamation.createdAt).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                    
+                    const causeText = {
+                        'technical': 'Technical Issue',
+                        'billing': 'Billing Problem',
+                        'account': 'Account Issue',
+                        'content': 'Content Concern',
+                        'other': 'Other'
+                    }[reclamation.cause];
+                    
+                    card.innerHTML = `
+                        <div class="reclamation-header">
+                            <div>
+                                <div class="reclamation-title">${causeText}</div>
+                                <div class="reclamation-date">Submitted on ${formattedDate}</div>
+                            </div>
+                            <div class="status-badge status-${reclamation.status}">
+                                ${reclamation.status === 'pending' ? 'In Progress' : 'Resolved'}
+                            </div>
+                        </div>
+                        
+                        <div class="detail-value">${reclamation.description}</div>
+                        
+                        <div class="reclamation-details">
+                            <div class="detail-group">
+                                <div class="detail-label">Reference ID</div>
+                                <div class="detail-value">TUN-${reclamation.id.toString().padStart(5, '0')}</div>
+                            </div>
+                            <div class="detail-group">
+                                <div class="detail-label">Email</div>
+                                <div class="detail-value">${reclamation.email}</div>
+                            </div>
+                        </div>
+                        
+                        ${reclamation.screenshot ? `
+                        <div class="detail-group">
+                            <div class="detail-label">Screenshot</div>
+                            <img src="${reclamation.screenshot}" class="screenshot-thumbnail" 
+                                 alt="Issue screenshot" onclick="openModal('${reclamation.screenshot}')">
+                        </div>
+                        ` : ''}
+                        
+                        ${reclamation.response ? `
+                        <div class="reclamation-response">
+                            <div class="response-label">
+                                <i class="fas fa-reply"></i> Our Response
+                            </div>
+                            <div class="detail-value">${reclamation.response}</div>
+                            <div class="reclamation-date" style="margin-top: 0.5rem;">
+                                Last updated on ${new Date(reclamation.updatedAt).toLocaleDateString('en-US', {
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric'
+                                })}
+                            </div>
+                        </div>
+                        ` : ''}
+                    `;
+                    
+                    reclamationsList.appendChild(card);
+                });
+            }
+            
+            // Filter reclamations based on search and status
+            function filterReclamations() {
+                const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+                const statusFilter = document.getElementById('statusFilter').value;
+                
+                const filtered = reclamations.filter(reclamation => {
+                    const matchesSearch = reclamation.description.toLowerCase().includes(searchTerm) || 
+                                         reclamation.email.toLowerCase().includes(searchTerm) ||
+                                         `TUN-${reclamation.id.toString().padStart(5, '0')}`.includes(searchTerm);
+                    
+                    const matchesStatus = statusFilter === 'all' || reclamation.status === statusFilter;
+                    
+                    return matchesSearch && matchesStatus;
+                });
+                
+                displayReclamations(filtered);
+            }
+            
+            // Initialize modal functionality
+            window.openModal = function(src) {
+                const modal = document.getElementById('imageModal');
+                const modalImg = document.getElementById('modalImage');
+                modalImg.src = src;
+                modal.style.display = 'flex';
+            };
+            
+            document.getElementById('modalClose').addEventListener('click', function() {
+                document.getElementById('imageModal').style.display = 'none';
+            });
+            
+            // Close modal when clicking outside the image
+            document.getElementById('imageModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.style.display = 'none';
+                }
+            });
+            
+            // Set up event listeners for filtering
+            document.getElementById('searchInput').addEventListener('input', filterReclamations);
+            document.getElementById('statusFilter').addEventListener('change', filterReclamations);
+            
+            // Initial display
+            displayReclamations(reclamations);
+        });
+    </script>
+</body>
+</html>
