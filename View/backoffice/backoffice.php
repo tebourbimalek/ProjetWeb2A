@@ -2,7 +2,7 @@
 session_start();  // Start the session to retrieve data
 
 
-include_once 'C:\xampp\htdocs\projetweb\model\function.php';  // Include the function file   
+include_once 'C:\xampp\htdocs\projetweb\controlleur\function.php';  // Include the function file   
 
 $counter = 1;  // Initialize a counter for the song number
 $counter1 = 1; // Initialize a counter for the song number in the top songs section

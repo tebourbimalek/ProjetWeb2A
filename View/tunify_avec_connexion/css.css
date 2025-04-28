@@ -937,3 +937,791 @@ img:not([src]) {
 .toggle-icon {
   transition: transform 0.2s ease;
 }
+
+
+.playlist-header {
+  margin-bottom: 20px;
+}
+
+.playlist-type {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 5px;
+}
+
+.playlist-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.playlist-title sup {
+  font-size: 12px;
+  vertical-align: super;
+}
+
+.playlist-owner {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 15px;
+}
+
+hr {
+  border: none;
+  border-top: 1px solid #ddd;
+  margin: 15px 0;
+}
+
+.section-title {
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+.search-container {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 10px 15px;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  font-size: 14px;
+  outline: none;
+}
+
+.search-input:focus {
+  border-color: #1db954;
+}
+
+.track-list {
+  list-style: none;
+}
+
+.track-item {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border-radius: 5px;
+  transition: background-color 0.2s;
+}
+
+.track-item:hover {
+  background-color: #eee;
+}
+
+.track-number {
+  width: 30px;
+  text-align: center;
+  color: #666;
+}
+
+.track-info {
+  flex: 1;
+  margin-left: 15px;
+}
+
+.track-title {
+  font-weight: 500;
+}
+
+.track-artist {
+  font-size: 14px;
+  color: #666;
+}
+
+.track-duration {
+  color: #666;
+  margin-right: 15px;
+}
+
+.track-actions {
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.track-item:hover .track-actions {
+  opacity: 1;
+}
+
+.action-btn {
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  margin-left: 10px;
+  font-size: 16px;
+}
+
+.action-btn:hover {
+  color: #1db954;
+}
+
+
+.photo-upload {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.photo-upload:hover {
+  opacity: 1;
+}
+
+.upload-content {
+  color: white;
+  font-size: 14px;
+  text-align: center;
+}
+
+.upload-content i {
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+.context-menu {
+  position: absolute;
+  display: none;
+  background: #222;
+  color: #fff;
+  border-radius: 6px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.6);
+  min-width: 200px;
+  font-size: 0.9rem;
+  z-index: 1000;
+}
+.context-menu ul {
+  list-style: none;
+  margin: 4px 0;
+  padding: 0;
+}
+.context-menu li {
+  padding: 8px 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+.context-menu li i {
+  margin-right: 8px;
+}
+.context-menu li:hover {
+  background: #333;
+}
+.context-menu .sep {
+  height: 1px;
+  margin: 4px 0;
+  background: #444;
+  pointer-events: none;
+}
+
+#icon_id:hover i {
+  color: green; /* Change to green when hovered */
+}
+
+#box_liked_song {
+  transition: background 0.3s ease;
+}
+.playlist-box {
+  width: 300px;
+  max-width: 300px;
+  height: 600px;
+  background-color: rgb(24, 24, 24);
+  border-radius: 14px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  z-index: 1000;
+  position: absolute;
+  bottom: 70px;
+  left:  360px;
+  transform: translateX(-50%);
+  display: none;
+}
+
+
+.header {
+  padding: 16px;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: start;
+  border-bottom: 1px solid #e5e5ea;
+}
+
+.option {
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #e5e5ea;
+}
+
+.option input[type="checkbox"] {
+  margin-right: 12px;
+  transform: scale(1.2);
+}
+
+.sub-option {
+  padding: 8px 16px 8px 40px;
+  color: #8e8e93;
+  font-size: 14px;
+  border-bottom: 1px solid #e5e5ea;
+}
+
+.footer {
+  padding: 16px;
+  text-align: center;
+  font-weight: 600;
+  color: #007aff;
+  border-top: 1px solid #e5e5ea;
+}
+
+.now-playing {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid #e5e5ea;
+}
+
+.song-title {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.artist-name {
+  font-size: 14px;
+  color: #8e8e93;
+  margin-top: 2px;
+}
+
+.song-time {
+  font-size: 14px;
+  color: #8e8e93;
+  margin-top: 8px;
+}
+
+.arrow {
+  margin-left: auto;
+  color: #8e8e93;
+}
+
+
+.playlist-box {
+  font-family: Arial, sans-serif;
+  width: 300px;
+  padding: 15px;
+  background-color: rgb(24, 24, 24);
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.header {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 15px;
+  color: #333;
+  border:none;
+}
+
+.playlist-option {
+  margin-bottom: 15px;
+}
+
+.search-container {
+  display: flex;
+  align-items: center;
+  margin-top: 8px;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  padding: 6px 12px;
+  background-color: #f5f5f5;
+}
+
+#search-playlist {
+  flex-grow: 1;
+  border: none;
+  background: transparent;
+  padding: 4px;
+  font-size: 14px;
+  outline: none;
+}
+
+.new-playlist-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+
+.new-playlist-btn:hover {
+  color: #1ed760;
+}
+
+/* Rest of your existing styles for checked options and sub-playlists */
+.playlist-option.checked {
+  background-color: #f5f5f5;
+  padding: 8px;
+  border-radius: 4px;
+}
+
+input[type="checkbox"] {
+  margin-right: 10px;
+}
+
+label {
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.sub-playlists {
+  margin-left: 25px;
+  margin-top: 8px;
+}
+
+.sub-playlist {
+  font-size: 13px;
+  color: #555;
+  padding: 4px 0;
+  cursor: pointer;
+}
+
+.sub-playlist:hover {
+  color: #333;
+}
+
+.sub-playlist.cancel {
+  color: #ff4d4d;
+  margin-top: 5px;
+  font-weight: 500;
+}
+
+.sub-playlist.cancel:hover {
+  color: #ff1a1a;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px;
+  border-top: 1px solid #e0e0e0;
+  margin-top: 20px;
+}
+
+.cancel-btn {
+  background: none;
+  border: none;
+  color: gray;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 16px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+  font-weight: bold;
+  border-radius: 20px;
+}
+
+.confirm-btn {
+  background-color: white;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  background-color: white;
+  color: black;
+  font-weight: bold;
+  padding: 10px 20px;
+  border-radius: 20px;
+}
+.cancel-btn, .confirm-btn {
+  transition: transform 0.2s ease, background-color 0.2s ease;
+  transform-origin: center;
+}
+
+
+/* General Container for the Playlist Box */
+.playlist-box {
+  background: rgb(24, 24, 24);
+  border-radius: 10px 10px 10px 10px;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  max-width: 400px;
+  margin: 20px auto;
+  font-family: 'Arial', sans-serif;
+  max-height: 450px;
+}
+
+/* Header Styling */
+.playlist-box .header {
+  font-size: 20px;
+  font-weight: bold;
+  color: #fff;
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+/* Search Box Styling */
+.playlist-option input[type="text"] {
+  width: calc(100% - 30px); /* Ensure the input fills available space */
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #444;
+  background-color: #333;
+  color: white;
+  font-size: 16px;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.playlist-option input[type="text"]:focus {
+  border-color: #2575FC;
+  background-color: #444;
+}
+
+/* New Playlist Button */
+.new-playlist-btn {
+  background: linear-gradient(135deg, #6A11CB, #2575FC);
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.new-playlist-btn:hover {
+  background: linear-gradient(135deg, #2575FC, #6A11CB);
+}
+
+/* Playlist List Section */
+.option {
+  display: flex;
+  flex-direction: column;
+  gap: 10px; /* space between playlist items */
+  padding: 15px 0;
+  overflow-y: auto;
+  max-height: 200px;
+  overflow-x: hidden;
+}
+
+/* Playlist Item Styling */
+.playlist-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+  transition: all 0.3s ease;
+}
+
+.playlist-item:hover {
+  background-color: #333;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.playlist-item .playlist-icon {
+  display: flex;
+  align-items: center;
+  margin-right: 15px;
+}
+
+/* Playlist Image */
+.playlist-item img {
+  width: 70px;
+  height: 60px;
+  border-radius: 5px;
+}
+
+/* Default Placeholder Image */
+.playlist-item .playlist-icon div {
+  background-color: #444;
+  width: 80px;
+  height: 60px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.playlist-item .playlist-icon i {
+  color: white;
+  font-size: 20px;
+}
+
+/* Playlist Name Button */
+.buttonplaylist {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 10px;
+  transition: all 0.3s ease;
+}
+
+.buttonplaylist:hover {
+  color: #2575FC;
+}
+
+/* Circle Icon for Song Presence */
+.playlist-item .circle-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  margin-left: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #444;
+  border: 2px solid #aaa;
+}
+
+.playlist-item .circle-icon i {
+  color: white;
+  font-size: 12px;
+}
+
+/* Dialog Actions (Buttons) */
+.dialog-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+/* Adding Hover Effects on Playlist Item */
+.playlist-item:hover {
+  background-color: #3c3c3c;
+  box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.3);
+}
+
+.playlist-card::-webkit-scrollbar {
+  width: 8px; /* Width of the scrollbar */
+}
+
+.playlist-card::-webkit-scrollbar-thumb {
+  background-color: #6A11CB; /* Color of the thumb */
+  border-radius: 10px; /* Rounded corners for the thumb */
+  border: 2px solid #2575FC; /* Border around the thumb */
+}
+
+.playlist-card::-webkit-scrollbar-track {
+  background: rgb(24, 24, 24); /* Background of the track */
+  border-radius: 10px;
+}
+
+/* Optional: Add hover effect for thumb */
+.playlist-card::-webkit-scrollbar-thumb:hover {
+  background-color: #2575FC; /* Change color on hover */
+}
+.playlist-card::-webkit-scrollbar {
+  width: 0px;
+  background: rgb(24, 24, 24); /* Just in case */
+  background-color: rgb(24, 24, 24);
+}
+
+.playlist-card {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+
+
+.song-number i {
+  font-size: 18px;
+  transition: all 0.3s ease;
+}
+
+.song-number i.fa-play {
+  color: green;
+}
+
+.song-number i.fa-pause {
+  color: red;
+}
+.song-row:hover .song-icon {
+  display: none;  /* Hide the default icon */
+}
+.song-row:hover .song-icon:hover {
+  display: inline-block; /* Show pause icon when hovering over the song while it’s playing */
+}
+
+.song-row {
+  opacity: 1;
+  transition: opacity 0.5s ease-in-out; /* Fade effect */
+}
+
+.active-song {
+  background-color: #1db9542a; /* light green background */
+  font-weight: bold;
+  transition: background 0.3s;
+}
+
+
+#playPauseButton {
+  background-color: green;
+  border: none;
+  border-radius: 50%;
+  padding: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+#playPauseButton i {
+  color: black;
+  font-size: 24px;
+}
+
+#playPauseButton:hover {
+  background-color: darkgreen;
+}
+
+.ellipsis-button {
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+}
+
+.ellipsis-button i {
+  color: gray;
+  font-size: 24px; /* Adjust the size of the ellipsis icon */
+}
+
+.ellipsis-button:hover {
+  color: white; /* Change the icon color on hover */
+}
+.share-button {
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  padding: 10px;
+}
+
+.share-button i {
+  color: gray; /* Blue color for the icon */
+  font-size: 24px; /* Adjust the size of the icon */
+}
+
+.share-button:hover i {
+  color: white; /* Darker blue when hovered */
+}
+
+
+.fa-circle-pause {
+  background-color: green;
+  border: none;
+  border-radius: 50%;
+  padding: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.fa-circle-pause i {
+  color: black;
+  font-size: 24px;
+}
+
+.fa-circle-pause:hover {
+  background-color: darkgreen;
+}
+
+.fa-circle-play {
+  background-color: green;
+  border: none;
+  border-radius: 50%;
+  padding: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.fa-circle-play i {
+  color: black;
+  font-size: 24px;
+}
+
+.fa-circle-play:hover {
+  background-color: darkgreen;
+}
+
+#shareBox {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 20px;
+  background-color: #222222;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+#shareLinkInput {
+  width: 300px;
+  padding: 5px;
+  margin-bottom: 10px;
+}
+
+#copyButton {
+  padding: 5px 10px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+#copyButton:hover {
+  background-color: #45a049;
+}
+
+
+
+
+#shareBox2 {
+  position: absolute;
+  top: 25%;
+  left: 80%;
+  transform: translate(-50%, -50%);
+  padding: 20px;
+  background-color: #222222;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  width: 390px;
+}
+
+#shareLinkInput2 {
+  width: 300px;
+  padding: 5px;
+  margin-bottom: 10px;
+}
+
+#copyButton2 {
+  padding: 5px 10px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+#copyButton2:hover {
+  background-color: #45a049;
+}
