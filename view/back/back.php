@@ -1,6 +1,7 @@
 <?php
 require_once "C:/xampp/htdocs/Tunify/Config.php";
 require_once "C:/xampp/htdocs/Tunify/model/Reclamation.php";
+require_once "C:/xampp/htdocs/Tunify/controller/GestionReclamationController.php";
 
 $page = isset($_GET['page']) ? $_GET['page'] : 'dashboard';
 $reclamationId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
@@ -444,6 +445,7 @@ function renderHeader($title) {
                 background-color: var(--primary-light);
                 border-radius: var(--border-radius);
                 border: 1px solid rgba(155, 93, 229, 0.3);
+                position: relative;
             }
 
             .response-header {
@@ -466,35 +468,83 @@ function renderHeader($title) {
             .response-text {
                 line-height: 1.6;
                 white-space: pre-wrap;
+                margin-bottom: 1rem;
             }
-
-            .modal {
-                display: none;
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background-color: rgba(0, 0, 0, 0.8);
-                z-index: 1000;
-                justify-content: center;
-                align-items: center;
+            
+            .response-actions {
+                display: flex;
+                justify-content: flex-end;
+                gap: 0.5rem;
+                margin-top: 0.5rem;
             }
-
-            .modal-content {
-                max-width: 90%;
-                max-height: 90%;
-            }
-
-            .modal-close {
-                position: absolute;
-                top: 2rem;
-                right: 2rem;
-                color: white;
-                font-size: 2rem;
+            
+            .response-btn {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.85rem;
+                border-radius: var(--border-radius);
                 cursor: pointer;
+                transition: var(--transition);
+                display: inline-flex;
+                align-items: center;
+                gap: 0.5rem;
+                background-color: transparent;
+                border: 1px solid;
+            }
+            
+            .edit-btn {
+                color: var(--primary);
+                border-color: var(--primary);
+            }
+            
+            .edit-btn:hover {
+                background-color: var(--primary-light);
+            }
+            
+            .delete-response-btn {
+                color: #ff4d4d;
+                border-color: #ff4d4d;
+            }
+            
+            .delete-response-btn:hover {
+                background-color: rgba(255, 77, 77, 0.1);
             }
 
+            .reject-btn {
+                color: #ff9800;
+                border-color: #ff9800;
+            }
+
+            .reject-btn:hover {
+                background-color: rgba(255, 152, 0, 0.1);
+            }
+
+            .status-rejected {
+                background-color: rgba(255, 152, 0, 0.2);
+                color: #ff9800;
+            }
+            
+            .view-screenshot-link {
+                margin-top: 0.5rem;
+            }
+            
+            .screenshot-link {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.5rem;
+                padding: 0.6rem 1.2rem;
+                background-color: var(--primary-light);
+                color: var(--primary);
+                border-radius: var(--border-radius);
+                font-weight: 500;
+                text-decoration: none;
+                transition: var(--transition);
+            }
+            
+            .screenshot-link:hover {
+                background-color: var(--primary);
+                color: white;
+            }
+            
             @media (max-width: 768px) {
                 .container {
                     padding: 0 1.5rem;
@@ -526,6 +576,15 @@ function renderHeader($title) {
                 .btn {
                     width: 100%;
                 }
+                
+                .response-actions {
+                    flex-direction: column;
+                }
+                
+                .response-btn {
+                    width: 100%;
+                    justify-content: center;
+                }
             }
         </style>
     </head>
@@ -537,133 +596,251 @@ function renderHeader($title) {
 function renderFooter() {
     ?>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Delete buttons handler
-            document.querySelectorAll('.btn-supprimer').forEach(button => {
-    button.addEventListener('click', (event) => {
-        event.preventDefault();
-        const id = button.dataset.id;
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('DOM fully loaded');
+        
+        // Delete buttons handler
+        document.querySelectorAll('.btn-supprimer').forEach(button => {
+            button.addEventListener('click', (event) => {
+                event.preventDefault();
+                const id = button.dataset.id;
+                console.log('Delete button clicked for ID:', id);
 
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "You won't be able to revert this!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#9b5de5',
-            cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Yes, delete it!'
-        }).then(async (result) => {
-            if (result.isConfirmed) {
-                try {
-                    const response = await handleAction('delete', id);
-                    if (response.status === 'success') {
-                        Swal.fire({
-                            title: 'Success!',
-                            text: response.message || 'Reclamation deleted successfully',
-                            icon: 'success'
-                        }).then(() => window.location.reload());
-                    } else {
-                        Swal.fire({
-                            title: 'Operation Failed',
-                            text: response.message || 'Could not delete the reclamation. Please try again.',
-                            icon: 'error'
-                        });
-                    }
-                } catch (error) {
-                    Swal.fire({
-                        title: 'Network Error',
-                        text: 'Failed to connect to the server. Please check your connection.',
-                        icon: 'error'
-                    });
-                }
-            }
-        });
-    });
-});
-            // Response buttons handler
-            document.querySelectorAll('.btn-repondre').forEach(button => {
-                button.addEventListener('click', (event) => {
-                    event.preventDefault();
-                    const id = button.dataset.id;
-
-                    Swal.fire({
-                        title: 'Write your response',
-                        input: 'textarea',
-                        inputPlaceholder: 'Type your response here...',
-                        showCancelButton: true,
-                        confirmButtonColor: '#9b5de5',
-                        cancelButtonColor: '#6c757d',
-                        confirmButtonText: 'Send Response'
-                    }).then(async (result) => {
-                        if (result.isConfirmed) {
-                            const response = await handleAction('respond', id, { response: result.value });
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#9b5de5',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then(async (result) => {
+                    if (result.isConfirmed) {
+                        try {
+                            const response = await handleAction('delete', id);
                             if (response.status === 'success') {
                                 Swal.fire({
                                     title: 'Success!',
-                                    text: response.message,
+                                    text: response.message || 'Reclamation deleted successfully',
                                     icon: 'success'
                                 }).then(() => window.location.reload());
                             } else {
                                 Swal.fire({
-                                    title: 'Error!',
-                                    text: response.message,
+                                    title: 'Operation Failed',
+                                    text: response.message || 'Could not delete the reclamation. Please try again.',
                                     icon: 'error'
                                 });
                             }
+                        } catch (error) {
+                            Swal.fire({
+                                title: 'Network Error',
+                                text: 'Failed to connect to the server. Please check your connection.',
+                                icon: 'error'
+                            });
                         }
-                    });
+                    }
                 });
             });
+        });
+        
+        // Response buttons handler
+        document.querySelectorAll('.btn-repondre').forEach(button => {
+            button.addEventListener('click', (event) => {
+                event.preventDefault();
+                const id = button.dataset.id;
+                console.log('Respond button clicked for ID:', id);
 
-    // URL of the backend API (matches your existing PHP endpoint)
-const actionsURL = 'http://localhost/Tunify/controller/actionsGestionReclamation.php';
+                Swal.fire({
+                    title: 'Write your response',
+                    input: 'textarea',
+                    inputPlaceholder: 'Type your response here...',
+                    showCancelButton: true,
+                    confirmButtonColor: '#9b5de5',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Send Response'
+                }).then(async (result) => {
+                    if (result.isConfirmed) {
+                        const response = await handleAction('respond', id, { response: result.value });
+                        if (response.status === 'success') {
+                            Swal.fire({
+                                title: 'Success!',
+                                text: response.message,
+                                icon: 'success'
+                            }).then(() => window.location.reload());
+                        } else {
+                            Swal.fire({
+                                title: 'Error!',
+                                text: response.message,
+                                icon: 'error'
+                            });
+                        }
+                    }
+                });
+            });
+        });
+        
+        // Edit Response button handler
+        document.querySelectorAll('.btn-edit-response').forEach(button => {
+            button.addEventListener('click', (event) => {
+                event.preventDefault();
+                const id = button.dataset.id;
+                const currentResponse = button.dataset.response;
+                console.log('Edit response button clicked for ID:', id);
 
-async function handleAction(action, id, extraData = {}) {
-    const formData = new FormData();
-    formData.append('action', action);
-    formData.append('id', id);
+                Swal.fire({
+                    title: 'Edit your response',
+                    input: 'textarea',
+                    inputValue: currentResponse,
+                    inputPlaceholder: 'Edit your response here...',
+                    showCancelButton: true,
+                    confirmButtonColor: '#9b5de5',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Update Response'
+                }).then(async (result) => {
+                    if (result.isConfirmed) {
+                        const response = await handleAction('edit_response', id, { response: result.value });
+                        if (response.status === 'success') {
+                            Swal.fire({
+                                title: 'Success!',
+                                text: response.message,
+                                icon: 'success'
+                            }).then(() => window.location.reload());
+                        } else {
+                            Swal.fire({
+                                title: 'Error!',
+                                text: response.message,
+                                icon: 'error'
+                            });
+                        }
+                    }
+                });
+            });
+        });
+        
+        // Delete Response button handler
+        document.querySelectorAll('.btn-delete-response').forEach(button => {
+            button.addEventListener('click', (event) => {
+                event.preventDefault();
+                const id = button.dataset.id;
+                console.log('Delete response button clicked for ID:', id);
 
-    // Append extra data (e.g., response text for 'respond' action)
-    if (action === 'respond' && extraData.response) {
-        formData.append('response', extraData.response);
-    }
-
-    try {
-        const response = await fetch(actionsURL, {
-            method: 'POST',
-            body: formData, // FormData is automatically encoded
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "This will delete your response and set the reclamation back to pending status",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#9b5de5',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then(async (result) => {
+                    if (result.isConfirmed) {
+                        try {
+                            const response = await handleAction('delete_response', id);
+                            if (response.status === 'success') {
+                                Swal.fire({
+                                    title: 'Success!',
+                                    text: response.message || 'Response deleted successfully',
+                                    icon: 'success'
+                                }).then(() => window.location.reload());
+                            } else {
+                                Swal.fire({
+                                    title: 'Operation Failed',
+                                    text: response.message || 'Could not delete the response. Please try again.',
+                                    icon: 'error'
+                                });
+                            }
+                        } catch (error) {
+                            console.error('Error deleting response:', error);
+                            Swal.fire({
+                                title: 'Network Error',
+                                text: 'Failed to connect to the server. Please check your connection.',
+                                icon: 'error'
+                            });
+                        }
+                    }
+                });
+            });
         });
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-        }
+        // Reject buttons handler - Fixed to work with all reject buttons
+        document.querySelectorAll('.btn-rejeter').forEach(button => {
+            console.log('Found reject button:', button);
+            button.addEventListener('click', function(event) {
+                event.preventDefault();
+                const id = this.dataset.id;
+                console.log('Reject button clicked for ID:', id);
 
-        const result = await response.json();
-        console.log('Server response:', result);
-        return result;
-    } catch (error) {
-        console.error('Error in handleAction:', error);
-        throw error;
-    }
-}
-            // Image modal handling
-            window.openModal = function(src) {
-                const modal = document.getElementById('imageModal');
-                const modalImg = document.getElementById('modalImage');
-                modalImg.src = src;
-                modal.style.display = 'flex';
-            };
-
-            document.getElementById('modalClose').addEventListener('click', () => {
-                document.getElementById('imageModal').style.display = 'none';
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "This will mark the reclamation as rejected",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#9b5de5',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Yes, reject it!'
+                }).then(async (result) => {
+                    if (result.isConfirmed) {
+                        try {
+                            const response = await handleAction('reject', id);
+                            console.log('Reject response:', response);
+                            if (response.status === 'success') {
+                                Swal.fire({
+                                    title: 'Success!',
+                                    text: response.message || 'Reclamation rejected successfully',
+                                    icon: 'success'
+                                }).then(() => window.location.reload());
+                            } else {
+                                Swal.fire({
+                                    title: 'Operation Failed',
+                                    text: response.message || 'Could not reject the reclamation. Please try again.',
+                                    icon: 'error'
+                                });
+                            }
+                        } catch (error) {
+                            console.error('Error rejecting reclamation:', error);
+                            Swal.fire({
+                                title: 'Network Error',
+                                text: 'Failed to connect to the server. Please check your connection.',
+                                icon: 'error'
+                            });
+                        }
+                    }
+                });
             });
+        });
 
-            document.getElementById('imageModal').addEventListener('click', (e) => {
-                if (e.target === this) {
-                    document.getElementById('imageModal').style.display = 'none';
+        // Handle AJAX requests
+        async function handleAction(action, id, extraData = {}) {
+            console.log(`Handling action: ${action} for ID: ${id}`);
+            const formData = new FormData();
+            formData.append('action', action);
+            formData.append('id', id);
+
+            // Append extra data (e.g., response text for 'respond' action)
+            if ((action === 'respond' || action === 'edit_response') && extraData.response) {
+                formData.append('response', extraData.response);
+            }
+
+            try {
+                console.log('Sending request to:', 'http://localhost/Tunify/controller/actionsGestionReclamation.php');
+                const response = await fetch('http://localhost/Tunify/controller/actionsGestionReclamation.php', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
                 }
-            });
-        });
+
+                const result = await response.json();
+                console.log('Server response:', result);
+                return result;
+            } catch (error) {
+                console.error('Error in handleAction:', error);
+                throw error;
+            }
+        }
+    });
     </script>
     </body>
     </html>
@@ -672,9 +849,14 @@ async function handleAction(action, id, extraData = {}) {
 
 // Render the dashboard page
 function renderDashboardPage() {
+    // Get the GestionReclamationController instance
+    $gestionController = new GestionReclamationController();
+    
     $status = isset($_GET['status']) ? $_GET['status'] : null;
     $reclamations = $status ? Reclamation::getByStatus($status) : Reclamation::getAll();
-    $stats = Reclamation::getStatistics();
+    
+    // Get statistics using the controller
+    $stats = $gestionController->countReclamations();
     
     renderHeader('Reclamations Dashboard');
     ?>
@@ -684,7 +866,7 @@ function renderDashboardPage() {
                 <i class="fas fa-arrow-left"></i>
                 <span>Back to Home</span>
             </a>
-            <img src="../Tunify.png" alt="Tunify Logo" class="logo" width="50">
+            <img src="../assets/tunify-logo.png" alt="Tunify Logo" class="logo" width="50">
         </div>
         <div style="color: var(--text-muted); font-weight: 500;">
             Admin Panel
@@ -709,12 +891,17 @@ function renderDashboardPage() {
                 <div class="stat-title">Resolved</div>
                 <div class="stat-value stat-resolved"><?= $stats['resolved'] ?></div>
             </div>
+            <div class="stat-card">
+                <div class="stat-title">Rejected</div>
+                <div class="stat-value" style="color: #ff9800;"><?= $stats['rejected'] ?? 0 ?></div>
+            </div>
         </div>
 
         <div class="filters">
             <a href="?status=" class="filter-btn <?= !isset($_GET['status']) ? 'active' : '' ?>">All</a>
             <a href="?status=pending" class="filter-btn <?= ($_GET['status'] ?? '') === 'pending' ? 'active' : '' ?>">Pending</a>
             <a href="?status=resolved" class="filter-btn <?= ($_GET['status'] ?? '') === 'resolved' ? 'active' : '' ?>">Resolved</a>
+            <a href="?status=rejected" class="filter-btn <?= ($_GET['status'] ?? '') === 'rejected' ? 'active' : '' ?>">Rejected</a>
         </div>
 
         <?php if (empty($reclamations)): ?>
@@ -755,7 +942,12 @@ function renderDashboardPage() {
                                 <a href="?page=details&id=<?= $reclamation->id ?>" class="action-btn view-btn">
                                     <i class="fas fa-eye"></i> View
                                 </a>
-                                <button class="action-btn delete-btn btn-supprimer" data-id="<?= $reclamation->id ?>">
+                                <?php if ($reclamation->status === 'pending'): ?>
+                                    <button type="button" class="action-btn reject-btn btn-rejeter" data-id="<?= $reclamation->id ?>">
+                                        <i class="fas fa-ban"></i> Reject
+                                    </button>
+                                <?php endif; ?>
+                                <button type="button" class="action-btn delete-btn btn-supprimer" data-id="<?= $reclamation->id ?>">
                                     <i class="fas fa-trash"></i> Delete
                                 </button>
                             </td>
@@ -784,7 +976,7 @@ function renderDetailsPage($id) {
                 <i class="fas fa-arrow-left"></i>
                 <span>Back to Dashboard</span>
             </a>
-            <img src="../Tunify.png" alt="Tunify Logo" class="logo" width="50">
+            <img src="C:/xampp/htdocs/Tunify/view/Tunify.png" alt="Tunify Logo" class="logo" width="50">
         </div>
         <div style="color: var(--text-muted); font-weight: 500;">
             Admin Panel
@@ -831,9 +1023,21 @@ function renderDetailsPage($id) {
             <?php if ($reclamation->screenshot): ?>
                 <div class="screenshot-container">
                     <div class="content-label">Screenshot</div>
-                    <img src="../uploads/screenshots/<?= $reclamation->screenshot ?>" 
-                         class="screenshot-thumbnail" alt="Issue screenshot" 
-                         onclick="openModal('../uploads/screenshots/<?= $reclamation->screenshot ?>')">
+                    <?php
+                    // Debug the screenshot path
+                    echo "<!-- Screenshot path: " . htmlspecialchars($reclamation->screenshot) . " -->";
+                    
+                    // Get the screenshot filename only
+                    $screenshotFilename = basename($reclamation->screenshot);
+                    
+                    // Construct the direct URL to the screenshot
+                    $screenshotUrl = "/Tunify/view/front/uploads/" . $screenshotFilename;
+                    ?>
+                    <div class="view-screenshot-link">
+                        <a href="<?= $screenshotUrl ?>" target="_blank" class="screenshot-link">
+                            <i class="fas fa-image"></i> View Screenshot
+                        </a>
+                    </div>
                 </div>
             <?php endif; ?>
 
@@ -846,22 +1050,33 @@ function renderDetailsPage($id) {
                         </div>
                     </div>
                     <div class="response-text"><?= htmlspecialchars($reclamation->response) ?></div>
+                    
+                    <!-- Response Actions -->
+                    <div class="response-actions">
+                        <button type="button" class="response-btn edit-btn btn-edit-response" 
+                                data-id="<?= $reclamation->id ?>" 
+                                data-response="<?= htmlspecialchars($reclamation->response) ?>">
+                            <i class="fas fa-edit"></i> Edit Response
+                        </button>
+                        <button type="button" class="response-btn delete-response-btn btn-delete-response" 
+                                data-id="<?= $reclamation->id ?>">
+                            <i class="fas fa-trash"></i> Delete Response
+                        </button>
+                    </div>
                 </div>
             <?php endif; ?>
         </div>
 
         <?php if ($reclamation->status === 'pending'): ?>
             <div class="form-actions">
-                <button class="btn btn-primary btn-repondre" data-id="<?= $reclamation->id ?>">
+                <button type="button" class="btn btn-primary btn-repondre" data-id="<?= $reclamation->id ?>">
                     <i class="fas fa-paper-plane"></i> Send Response
+                </button>
+                <button type="button" class="btn btn-secondary btn-rejeter" data-id="<?= $reclamation->id ?>" style="background-color: rgba(255, 152, 0, 0.1); color: #ff9800; border-color: #ff9800;">
+                    <i class="fas fa-ban"></i> Reject Reclamation
                 </button>
             </div>
         <?php endif; ?>
-    </div>
-
-    <div class="modal" id="imageModal">
-        <span class="modal-close" id="modalClose">&times;</span>
-        <img class="modal-content" id="modalImage">
     </div>
     <?php
     renderFooter();
@@ -876,4 +1091,3 @@ switch ($page) {
         break;
 }
 ?>
-

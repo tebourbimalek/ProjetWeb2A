@@ -90,5 +90,62 @@ class Reclamation {
         $stmt = $pdo->prepare("DELETE FROM reclamations WHERE id = ?");
         return $stmt->execute([$id]);
     }
+
+    public function updateReclamation($idReclamation, $data) {
+        try {
+            $db = Config::getConnexion();
+            
+            // Fixed table name from "reclamation" to "reclamations"
+            $query = "UPDATE reclamations SET 
+                      cause = :cause, 
+                      description = :description 
+                      WHERE id = :id";
+            
+            $statement = $db->prepare($query);
+            $statement->bindParam(':cause', $data['cause']);
+            $statement->bindParam(':description', $data['description']);
+            $statement->bindParam(':id', $idReclamation, PDO::PARAM_INT);
+            
+            $result = $statement->execute();
+            
+            // Log the result
+            error_log("Update result: " . ($result ? "success" : "failure"));
+            error_log("Rows affected: " . $statement->rowCount());
+            
+            return $result;
+        } catch (Exception $e) {
+            error_log('Database error: ' . $e->getMessage());
+            return false;
+        }
+    }
+    
+    public function updateReclamationWithScreenshot($idReclamation, $data, $screenshotPath) {
+        try {
+            $db = Config::getConnexion();
+            
+            $query = "UPDATE reclamations SET 
+                      cause = :cause, 
+                      description = :description,
+                      screenshot = :screenshot
+                      WHERE id = :id";
+            
+            $statement = $db->prepare($query);
+            $statement->bindParam(':cause', $data['cause']);
+            $statement->bindParam(':description', $data['description']);
+            $statement->bindParam(':screenshot', $screenshotPath);
+            $statement->bindParam(':id', $idReclamation, PDO::PARAM_INT);
+            
+            $result = $statement->execute();
+            
+            // Log the result
+            error_log("Update with screenshot result: " . ($result ? "success" : "failure"));
+            error_log("Rows affected: " . $statement->rowCount());
+            
+            return $result;
+        } catch (Exception $e) {
+            error_log('Database error: ' . $e->getMessage());
+            return false;
+        }
+    }
 }
 ?>

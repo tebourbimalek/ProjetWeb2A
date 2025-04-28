@@ -35,11 +35,45 @@ try {
                 throw new Exception('Response cannot be empty');
             }
 
-            if ($gestionController->repondreReclamation($id, $response)) { // Fixed variable name
+            if ($gestionController->repondreReclamation($id, $response)) {
                 echo json_encode([
                     'status' => 'success',
                     'message' => 'Response submitted successfully'
                 ]);
+            }
+            break;
+            
+        case 'edit_response':
+            $response = $_POST['response'] ?? '';
+            if (empty($response)) {
+                throw new Exception('Response cannot be empty');
+            }
+
+            if ($gestionController->modifierReponse($id, $response)) {
+                echo json_encode([
+                    'status' => 'success',
+                    'message' => 'Response updated successfully'
+                ]);
+            }
+            break;
+            
+        case 'delete_response':
+            if ($gestionController->supprimerReponse($id)) {
+                echo json_encode([
+                    'status' => 'success',
+                    'message' => 'Response deleted successfully'
+                ]);
+            }
+            break;
+
+        case 'reject':
+            if ($gestionController->rejeterReclamation($id)) {
+                echo json_encode([
+                    'status' => 'success',
+                    'message' => 'Reclamation rejected successfully'
+                ]);
+            } else {
+                throw new Exception('Failed to reject reclamation');
             }
             break;
 

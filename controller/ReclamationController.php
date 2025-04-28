@@ -4,71 +4,259 @@ require_once "C:/xampp/htdocs/Tunify/model/Reclamation.php";
 
 class ReclamationController
 {
-
-public function createReclamation($data, $file = null)
-{
-    $pdo = Config::getConnexion();
-    try {
-        $screenshotPath = null;
-        if ($file && $file['error'] === UPLOAD_ERR_OK) {
-            $uploadDir = 'uploads/';
-            if (!is_dir($uploadDir)) {
-                mkdir($uploadDir, 0755, true);
+    public function createReclamation($data, $file = null)
+    {
+        $pdo = Config::getConnexion();
+        try {
+            $screenshotPath = null;
+            if ($file && $file['error'] === UPLOAD_ERR_OK) {
+                $uploadDir = 'uploads/';
+                if (!is_dir($uploadDir)) {
+                    mkdir($uploadDir, 0755, true);
+                }
+                $filename = uniqid() . '_' . basename($file['name']);
+                $targetPath = $uploadDir . $filename;
+                if (move_uploaded_file($file['tmp_name'], $targetPath)) {
+                    $screenshotPath = $targetPath;
+                }
             }
-            $filename = uniqid() . '_' . basename($file['name']);
-            $targetPath = $uploadDir . $filename;
-            if (move_uploaded_file($file['tmp_name'], $targetPath)) {
-                $screenshotPath = $targetPath;
+
+            $stmt = $pdo->prepare(
+                "INSERT INTO reclamations 
+                (full_name, email, cause, description, screenshot, status, created_at) 
+                VALUES (?, ?, ?, ?, ?, 'pending', NOW())"
+            );
+
+            $success = $stmt->execute([
+                $data['full_name'],
+                $data['email'],
+                $data['cause'],
+                $data['description'],
+                $screenshotPath
+            ]);
+
+            if ($success && $this->sendConfirmationEmail($data['email'], $data['full_name'])) {
+                return ['status' => 'success', 'message' => 'Reclamation submitted successfully'];
             }
+            return ['status' => 'error', 'message' => 'Error submitting reclamation'];
+        } catch (PDOException $e) {
+            return ['status' => 'error', 'message' => 'Database error: ' . $e->getMessage()];
         }
-
-        $stmt = $pdo->prepare(
-            "INSERT INTO reclamations 
-            (full_name, email, cause, description, screenshot, status, created_at) 
-            VALUES (?, ?, ?, ?, ?, 'pending', NOW())"
-        );
-
-        $success = $stmt->execute([
-            $data['full_name'],
-            $data['email'],
-            $data['cause'],
-            $data['description'],
-            $screenshotPath
-        ]);
-
-        if ($success && $this->sendConfirmationEmail($data['email'], $data['full_name'])) {
-            return ['status' => 'success', 'message' => 'Reclamation submitted successfully'];
-        }
-        return ['status' => 'error', 'message' => 'Error submitting reclamation'];
-    } catch (PDOException $e) {
-        return ['status' => 'error', 'message' => 'Database error: ' . $e->getMessage()];
     }
-}
 
     public static function getAllReclamations()
     {
         $pdo = Config::getConnexion();
         return $pdo->query("SELECT * FROM reclamations ORDER BY created_at DESC")->fetchAll();
     }
-}
-
-// Form handling
-session_start();
-
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    error_reporting(0); // Disable error display
-    header('Content-Type: application/json');
     
-    try {
-        // Process form data
-        $controller = new ReclamationController();
-        $result = $controller->createReclamation($_POST, $_FILES['screenshot'] ?? null);
-        
-        echo json_encode(['status' => 'success']);
-        exit();
-    } catch (Exception $e) {
-        echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
-        exit();
+    /**
+     * Get reclamations by email address
+     * 
+     * @param string $email The email address to search for
+     * @return array|string Array of reclamations or error message
+     */
+    public function getReclamationsByEmail($email)
+    {
+        try {
+            // Get database connection
+            $pdo = Config::getConnexion();
+            
+            // Log the search attempt
+            error_log("Searching for reclamations with email: " . $email);
+            
+            // Direct query to match the database structure exactly
+            $query = "SELECT * FROM reclamations WHERE email = :email";
+            $stmt = $pdo->prepare($query);
+            $stmt->bindParam(':email', $email);
+            $stmt->execute();
+            
+            // Fetch all matching records
+            $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            // Log the number of results found
+            error_log("Found " . count($results) . " reclamations for email: " . $email);
+            
+            // Return the results
+            return $results;
+        } catch (PDOException $e) {
+            error_log("Database error in getReclamationsByEmail: " . $e->getMessage());
+            return [];
+        }
+    }
+    
+    /**
+     * Delete a reclamation by ID
+     * 
+     * @param int $id The reclamation ID to delete
+     * @return bool True if successful, false otherwise
+     */
+    public function deleteReclamation($id)
+    {
+        $pdo = Config::getConnexion();
+        try {
+            // First delete any associated responses
+            $stmt = $pdo->prepare("DELETE FROM responses WHERE reclamation_id = ?");
+            $stmt->execute([$id]);
+            
+            // Then delete the reclamation
+            $stmt = $pdo->prepare("DELETE FROM reclamations WHERE id = ? AND status = 'pending'");
+            $stmt->execute([$id]);
+            
+            return $stmt->rowCount() > 0;
+        } catch (PDOException $e) {
+            error_log("Error deleting reclamation: " . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * Update a reclamation by ID
+     * 
+     * @param int $id The reclamation ID to update
+     * @param array $data The updated data (cause, description)
+     * @return array Status and message
+     */
+    public function updateReclamation($id, $data)
+    {
+        $pdo = Config::getConnexion();
+        try {
+            // Validate the data
+            if (empty($data['cause']) || empty($data['description'])) {
+                return [
+                    'status' => 'error',
+                    'message' => 'Cause and description are required'
+                ];
+            }
+            
+            if (strlen($data['description']) < 30) {
+                return [
+                    'status' => 'error',
+                    'message' => 'Description must be at least 30 characters long'
+                ];
+            }
+            
+            // Check if we need to remove the screenshot
+            $updateQuery = "UPDATE reclamations SET cause = ?, description = ?";
+            $params = [$data['cause'], $data['description']];
+            
+            if (isset($data['removeScreenshot']) && $data['removeScreenshot']) {
+                $updateQuery .= ", screenshot = NULL";
+            }
+            
+            $updateQuery .= " WHERE id = ? AND status = 'pending'";
+            $params[] = $id;
+            
+            // Only allow updating pending reclamations
+            $stmt = $pdo->prepare($updateQuery);
+            $stmt->execute($params);
+            
+            if ($stmt->rowCount() > 0) {
+                return [
+                    'status' => 'success',
+                    'message' => 'Reclamation updated successfully'
+                ];
+            } else {
+                return [
+                    'status' => 'error',
+                    'message' => 'No changes made or reclamation cannot be updated'
+                ];
+            }
+        } catch (PDOException $e) {
+            error_log("Error updating reclamation: " . $e->getMessage());
+            return [
+                'status' => 'error',
+                'message' => 'Database error: ' . $e->getMessage()
+            ];
+        }
+    }
+    
+    /**
+     * Update a reclamation with a new screenshot
+     * 
+     * @param int $id The reclamation ID to update
+     * @param array $data The updated data (cause, description)
+     * @param array $file The uploaded file
+     * @return array Status and message
+     */
+    public function updateReclamationWithScreenshot($id, $data, $file)
+    {
+        $pdo = Config::getConnexion();
+        try {
+            // Validate the data
+            if (empty($data['cause']) || empty($data['description'])) {
+                return [
+                    'status' => 'error',
+                    'message' => 'Cause and description are required'
+                ];
+            }
+            
+            if (strlen($data['description']) < 30) {
+                return [
+                    'status' => 'error',
+                    'message' => 'Description must be at least 30 characters long'
+                ];
+            }
+            
+            // Process the screenshot
+            $screenshotPath = null;
+            if ($file && $file['error'] === UPLOAD_ERR_OK) {
+                $uploadDir = 'uploads/';
+                if (!is_dir($uploadDir)) {
+                    mkdir($uploadDir, 0755, true);
+                }
+                $filename = uniqid() . '_' . basename($file['name']);
+                $targetPath = $uploadDir . $filename;
+                if (move_uploaded_file($file['tmp_name'], $targetPath)) {
+                    $screenshotPath = $targetPath;
+                }
+            }
+            
+            // Update the reclamation
+            $stmt = $pdo->prepare(
+                "UPDATE reclamations 
+                SET cause = ?, description = ?, screenshot = ? 
+                WHERE id = ? AND status = 'pending'"
+            );
+            
+            $stmt->execute([
+                $data['cause'],
+                $data['description'],
+                $screenshotPath,
+                $id
+            ]);
+            
+            if ($stmt->rowCount() > 0) {
+                return [
+                    'status' => 'success',
+                    'message' => 'Reclamation updated successfully'
+                ];
+            } else {
+                return [
+                    'status' => 'error',
+                    'message' => 'No changes made or reclamation cannot be updated'
+                ];
+            }
+        } catch (PDOException $e) {
+            error_log("Error updating reclamation with screenshot: " . $e->getMessage());
+            return [
+                'status' => 'error',
+                'message' => 'Database error: ' . $e->getMessage()
+            ];
+        }
+    }
+    
+    /**
+     * Send confirmation email after reclamation submission
+     * 
+     * @param string $email Recipient email
+     * @param string $name Recipient name
+     * @return bool True if email sent successfully
+     */
+    private function sendConfirmationEmail($email, $name)
+    {
+        // This is a placeholder - implement actual email sending logic
+        // For example, using PHP's mail() function or a library like PHPMailer
+        return true;
     }
 }

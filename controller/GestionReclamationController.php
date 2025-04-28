@@ -60,7 +60,7 @@ class GestionReclamationController
     }
 }
 
-public function repondreReclamation($id, $response)
+public function repondreReclamation($id, $content)
 {
     try {
         $this->pdo->beginTransaction();
@@ -71,7 +71,10 @@ public function repondreReclamation($id, $response)
              SET response = :response, status = 'resolved', updated_at = NOW() 
              WHERE id = :id"
         );
-        $updateQuery->execute([$response, $id]);
+        $updateQuery->execute([
+            ':response' => $content,
+            ':id' => $id
+        ]);
 
         // Add to responses table
         $responseQuery = $this->pdo->prepare(
@@ -80,29 +83,50 @@ public function repondreReclamation($id, $response)
         );
         $responseQuery->execute([
             ':reclamation_id' => $id,
-            ':content' => $content,
-            ':created_at' => NOW(),
+            ':content' => $content
         ]);
 
         $this->pdo->commit();
-         return true;
+        return true;
     } catch (PDOException $e) {
         $this->pdo->rollBack();
         throw new Exception("Error responding to reclamation: " . $e->getMessage());
     }
 }
 
-    public function countReclamations()
+public function modifierReponse($id, $response)
     {
         try {
-            return [
-                'total' => $this->pdo->query("SELECT COUNT(*) FROM reclamations")->fetchColumn(),
-                'pending' => $this->pdo->query("SELECT COUNT(*) FROM reclamations WHERE status = 'pending'")->fetchColumn(),
-                'resolved' => $this->pdo->query("SELECT COUNT(*) FROM reclamations WHERE status = 'resolved'")->fetchColumn()
-            ];
+            $stmt = $this->pdo->prepare("UPDATE reclamations SET response = ?, updated_at = NOW() WHERE id = ?");
+            return $stmt->execute([$response, $id]);
         } catch (PDOException $e) {
-            throw new Exception("Error getting stats: " . $e->getMessage());
+            throw new Exception("Error updating response: " . $e->getMessage());
         }
     }
+
+    public function supprimerReponse($id)
+    {
+        try {
+            $stmt = $this->pdo->prepare("UPDATE reclamations SET response = NULL, status = 'pending', updated_at = NOW() WHERE id = ?");
+            return $stmt->execute([$id]);
+        } catch (PDOException $e) {
+            throw new Exception("Error deleting response: " . $e->getMessage());
+        }
+    }
+
+public function countReclamations()
+{
+    try {
+        return [
+            'total' => $this->pdo->query("SELECT COUNT(*) FROM reclamations")->fetchColumn(),
+            'pending' => $this->pdo->query("SELECT COUNT(*) FROM reclamations WHERE status = 'pending'")->fetchColumn(),
+            'resolved' => $this->pdo->query("SELECT COUNT(*) FROM reclamations WHERE status = 'resolved'")->fetchColumn(),
+            'rejected' => $this->pdo->query("SELECT COUNT(*) FROM reclamations WHERE status = 'rejected'")->fetchColumn()
+        ];
+    } catch (PDOException $e) {
+        throw new Exception("Error getting stats: " . $e->getMessage());
+    }
+}
+
 }
 ?>

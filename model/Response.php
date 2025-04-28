@@ -1,7 +1,7 @@
 <?php
-require_once "C:/xampp/htdocs/Tunify/config.php"; // Inclusion de la configuration de la base de données
+require_once "C:/xampp/htdocs/Tunify/config.php";
 
-class Reponse {
+class Response {
     private $id;
     private $reclamation_id;
     private $content;
@@ -22,15 +22,33 @@ class Reponse {
     // Database operations
     public function save() {
         $pdo = Config::getConnexion();
-        $stmt = $pdo->prepare("INSERT INTO responses (reclamation_id, content, created_at) VALUES (?, ?, ?)");
-        return $stmt->execute([$this->reclamation_id, $this->content, $this->created_at]);
+        $stmt = $pdo->prepare("INSERT INTO responses (reclamation_id, content, created_at) 
+            VALUES (?, ?, ?)");
+        return $stmt->execute([
+            $this->reclamation_id,
+            $this->content,
+            $this->created_at
+        ]);
     }
 
-    public static function getByReclamation($reclamation_id) {
+    public static function getByReclamationId($reclamation_id) {
         $pdo = Config::getConnexion();
-        $stmt = $pdo->prepare("SELECT * FROM responses WHERE reclamation_id = ?");
+        $stmt = $pdo->prepare("SELECT * FROM responses WHERE reclamation_id = ? ORDER BY created_at DESC");
         $stmt->execute([$reclamation_id]);
         return $stmt->fetchAll(PDO::FETCH_OBJ);
+    }
+
+    public static function getById($id) {
+        $pdo = Config::getConnexion();
+        $stmt = $pdo->prepare("SELECT * FROM responses WHERE id = ?");
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_OBJ);
+    }
+
+    public static function delete($id) {
+        $pdo = Config::getConnexion();
+        $stmt = $pdo->prepare("DELETE FROM responses WHERE id = ?");
+        return $stmt->execute([$id]);
     }
 }
 ?>
