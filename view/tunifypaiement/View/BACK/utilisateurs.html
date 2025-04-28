@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Back Office Paiements - Tunify</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Styles supplémentaires pour les onglets */
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--gray);
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background: #1e1e1e;
+            border: 1px solid transparent;
+            border-bottom: none;
+            margin-right: 5px;
+            border-radius: 5px 5px 0 0;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            background: var(--gray);
+            border-color: var(--gray);
+            color: var(--primary);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Espacement entre les tableaux */
+        .transactions-panel {
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="sidebar">
+        <img src="image/logo1.png" alt="Tunify Logo">
+        <a href="utilisateurs.html"><i class="fas fa-users"></i> Utilisateurs</a>
+    </nav>
+
+    <!-- Contenu principal -->
+    <main class="main-content">
+        <div class="dashboard-header">
+            <h1 class="page-title">Gestion des Paiements</h1>
+            <div class="user-profile">
+                <div class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <span>Admin</span>
+            </div>
+        </div>
+
+        <!-- Onglets -->
+        <div class="tabs">
+            <div class="tab active" onclick="openTab('recent')">Transactions récentes</div>
+            <div class="tab" onclick="openTab('cards')">Paiements par carte</div>
+            <div class="tab" onclick="openTab('mobile')">Paiements par mobile</div>
+        </div>
+
+        <!-- Contenu des onglets -->
+        <div id="recent" class="tab-content active">
+            <!-- Tableau des transactions récentes -->
+            <div class="transactions-panel">
+                <div class="panel-header">
+                    <h2 class="panel-title">Transactions récentes</h2>
+                    <div class="search-box">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" class="search-input" placeholder="Rechercher..." id="search-recent">
+                    </div>
+                </div>
+                <table class="transactions-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Date</th>
+                            <th>Méthode</th>
+                            <th>Abonnement</th>
+                            <th>user_id</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recent-transactions-body">
+                        <!-- Rempli dynamiquement par JavaScript -->
+                    </tbody>
+                </table>
+                
+                <div class="pagination">
+                    <button class="page-btn" onclick="prevPage('recent')"><i class="fas fa-chevron-left"></i></button>
+                    <button class="page-btn active" data-page="1">1</button>
+                    <button class="page-btn" data-page="2">2</button>
+                    <button class="page-btn" data-page="3">3</button>
+                    <button class="page-btn" onclick="nextPage('recent')"><i class="fas fa-chevron-right"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <div id="cards" class="tab-content">
+            <!-- Tableau des paiements par carte -->
+            <div class="transactions-panel">
+                <div class="panel-header">
+                    <h2 class="panel-title">Paiements par carte</h2>
+                    <div class="search-box">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" class="search-input" placeholder="Rechercher..." id="search-cards">
+                    </div>
+                </div>
+                
+                <table class="transactions-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Date Expiration</th>
+                            <th>Transaction ID</th>
+                            <th>Type de carte</th>
+                            <th>Numéro (masqué)</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="card-payments-body">
+                        <!-- Rempli dynamiquement par JavaScript -->
+                    </tbody>
+                </table>
+                
+                <div class="pagination">
+                    <button class="page-btn" onclick="prevPage('cards')"><i class="fas fa-chevron-left"></i></button>
+                    <button class="page-btn active" data-page="1">1</button>
+                    <button class="page-btn" data-page="2">2</button>
+                    <button class="page-btn" data-page="3">3</button>
+                    <button class="page-btn" onclick="nextPage('cards')"><i class="fas fa-chevron-right"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <div id="mobile" class="tab-content">
+            <!-- Tableau des paiements par mobile -->
+            <div class="transactions-panel">
+                <div class="panel-header">
+                    <h2 class="panel-title">Paiements par mobile</h2>
+                    <div class="search-box">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" class="search-input" placeholder="Rechercher..." id="search-mobile">
+                    </div>
+                </div>
+                
+                <table class="transactions-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Date Expiration</th>
+                            <th>Transaction ID</th>
+                            <th>Fournisseur</th>
+                            <th>Numéro (masqué)</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="mobile-payments-body">
+                        <!-- Rempli dynamiquement par JavaScript -->
+                    </tbody>
+                </table>
+                
+                <div class="pagination">
+                    <button class="page-btn" onclick="prevPage('mobile')"><i class="fas fa-chevron-left"></i></button>
+                    <button class="page-btn active" data-page="1">1</button>
+                    <button class="page-btn" data-page="2">2</button>
+                    <button class="page-btn" data-page="3">3</button>
+                    <button class="page-btn" onclick="nextPage('mobile')"><i class="fas fa-chevron-right"></i></button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Fonction pour gérer les onglets
+        function openTab(tabId) {
+            // Masquer tous les contenus d'onglet
+            const tabContents = document.getElementsByClassName('tab-content');
+            for (let i = 0; i < tabContents.length; i++) {
+                tabContents[i].classList.remove('active');
+            }
+            
+            // Désactiver tous les onglets
+            const tabs = document.getElementsByClassName('tab');
+            for (let i = 0; i < tabs.length; i++) {
+                tabs[i].classList.remove('active');
+            }
+            
+            // Activer l'onglet sélectionné
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+            
+            // Charger les données si nécessaire
+            loadTabData(tabId);
+        }
+
+        // Fonction pour charger les données d'un onglet
+        function loadTabData(tabId) {
+            fetch('get_transactions.php')
+                .then(response => response.json())
+                .then(data => {
+                    if (tabId === 'recent') {
+                        fillRecentTransactions(data.recent);
+                    } else if (tabId === 'cards') {
+                        fillCardPayments(data.cards);
+                    } else if (tabId === 'mobile') {
+                        fillMobilePayments(data.mobile);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        // Fonctions de remplissage des tableaux
+        function fillRecentTransactions(transactions) {
+            const tbody = document.getElementById('recent-transactions-body');
+            tbody.innerHTML = '';
+            
+            transactions.forEach(transaction => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${transaction.ID}</td>
+                    <td>${transaction.Date}</td>
+                    <td>${transaction.payment_method}</td>
+                    <td>${transaction.Abonnement}</td>
+                    <td>${transaction.user_id}</td>
+                    <td>
+                        <button class="btn btn-edit">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function fillCardPayments(cardPayments) {
+            const tbody = document.getElementById('card-payments-body');
+            tbody.innerHTML = '';
+            
+            cardPayments.forEach(payment => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${payment.ID}</td>
+                    <td>${payment.Date_Expiration}</td>
+                    <td>${payment.transaction_id}</td>
+                    <td>${payment.Type_Carte}</td>
+                    <td>•••• ${payment.Numero_Carte ? payment.Numero_Carte.slice(-4) : '****'}</td>
+                    <td>
+                        <button class="btn btn-edit">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function fillMobilePayments(mobilePayments) {
+            const tbody = document.getElementById('mobile-payments-body');
+            tbody.innerHTML = '';
+            
+            mobilePayments.forEach(payment => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${payment.ID}</td>
+                    <td>${payment.Date_Expiration}</td>
+                    <td>${payment.transaction_id}</td>
+                    <td>${payment.mobile_provider}</td>
+                    <td>•••• ••${payment.phone_number ? payment.phone_number.slice(-2) : '**'}</td>
+                    <td>
+                        <button class="btn btn-edit">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Fonctions de pagination
+        function prevPage(tabId) {
+            // Implémentation de la pagination précédente
+            console.log('Previous page for', tabId);
+        }
+
+        function nextPage(tabId) {
+            // Implémentation de la pagination suivante
+            console.log('Next page for', tabId);
+        }
+
+        // Charger les données initiales
+        document.addEventListener('DOMContentLoaded', function() {
+            loadTabData('recent');
+        });
+    </script>
+    <!-- Ajoutez ce script juste avant la balise </body> -->
+<script src="payment-admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,276 @@
+:root {
+    --primary: #1DB954;
+    --dark: #121212;
+    --light: #FFFFFF;
+    --gray: #2a2a2a;
+    --light-gray: #B3B3B3;
+    --purple: #4B0082;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background-color: var(--dark);
+    color: var(--light);
+    min-height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 97%;
+    background: #1e1e1e;
+    padding: 10px 20px;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 90px;
+    margin: 0 auto;
+}
+
+.sidebar img {
+    width: 140px;
+    height: auto;
+    margin-right: 500px;
+}
+
+.sidebar a {
+    display: flex;
+    align-items: center;
+    color: white;
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    transition: 0.3s;
+    opacity: 0.8;
+    font-size: 16px;
+}
+
+.sidebar a:hover {
+    background: #4B0082;
+    opacity: 1;
+}
+
+.sidebar a.active {
+    background: #4B0082;
+    opacity: 1;
+}
+
+/* Contenu principal */
+.main-content {
+    padding: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.page-title {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.user-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: var(--gray);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+
+/* Tableau des transactions */
+.transactions-panel {
+    background: #1e1e1e;
+    border: 1px solid var(--gray);
+    border-radius: 8px;
+    padding: 15px;
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.panel-title {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.search-box {
+    position: relative;
+    width: 200px;
+}
+
+.search-input {
+    width: 100%;
+    padding: 8px 15px 8px 35px;
+    background-color: var(--dark);
+    border: 1px solid var(--gray);
+    border-radius: 20px;
+    color: var(--light);
+}
+
+.search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--light-gray);
+}
+
+.transactions-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.transactions-table th {
+    text-align: left;
+    padding: 12px;
+    color: var(--light-gray);
+    border-bottom: 1px solid var(--gray);
+}
+
+.transactions-table td {
+    padding: 12px;
+    border-bottom: 1px solid var(--gray);
+}
+
+.status {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 14px;
+}
+
+.completed {
+    background-color: rgba(29, 185, 84, 0.1);
+    color: var(--primary);
+}
+
+.pending {
+    background-color: rgba(255, 165, 0, 0.1);
+    color: orange;
+}
+
+.failed {
+    background-color: rgba(255, 77, 77, 0.1);
+    color: #FF4D4D;
+}
+
+/* Boutons */
+.action-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.btn {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.2s;
+}
+
+.btn-edit {
+    background-color: #1E90FF;
+    color: white;
+}
+
+.btn-edit:hover {
+    background-color: #187bcd;
+}
+
+.btn-delete {
+    background-color: #FF4500;
+    color: white;
+}
+
+.btn-delete:hover {
+    background-color: #e03e00;
+}
+
+/* Pagination */
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    gap: 5px;
+}
+
+.page-btn {
+    padding: 8px 12px;
+    background-color: var(--gray);
+    border: none;
+    border-radius: 4px;
+    color: var(--light);
+    cursor: pointer;
+}
+
+.page-btn.active {
+    background-color: var(--primary);
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .sidebar {
+        gap: 40px;
+    }
+    
+    .sidebar img {
+        margin-right: 200px;
+    }
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        flex-direction: column;
+        gap: 10px;
+        padding: 15px;
+        width: 100%;
+    }
+    
+    .sidebar img {
+        margin-right: 0;
+        margin-bottom: 10px;
+    }
+    
+    .search-box {
+        width: 100%;
+        margin-top: 10px;
+    }
+    
+    .panel-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+        gap: 5px;
+    }
+}
