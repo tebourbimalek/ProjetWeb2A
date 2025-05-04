@@ -23,7 +23,7 @@ class User {
         string $mot_de_passe,
         string $prenom,
         string $nom_famille,
-        string $date_naissance,
+        ?string $date_naissance,
         string $image_path = 'default.jpg',
         string $type_utilisateur = 'user',
         int $score = 0,

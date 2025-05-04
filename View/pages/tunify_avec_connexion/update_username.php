@@ -1,51 +1,36 @@
 <?php
-// Start the session
 session_start();
-
-// Include the config file
 require_once 'C:\xampp\htdocs\projetweb\Model\includes\config.php';
+require_once 'C:\xampp\htdocs\projetweb\Model\includes\user.php';
+require_once 'C:\xampp\htdocs\projetweb\controller\controller.php';
 
-
-// Check if form is submitted
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!isset($_SESSION['user'])) {
-        echo json_encode(['success' => false, 'message' => 'Utilisateur non connecté.']);
-        exit;
-    }
-
-    $newUsername = trim($_POST['username']);
-
-    if (empty($newUsername)) {
-        echo json_encode(['success' => false, 'message' => 'Le nom d\'utilisateur ne peut pas être vide.']);
-        exit;
-    }
-
-    // Récupération de l'ID artiste proprement
-    $artiste_id = null;
-    if (isset($_SESSION['user']['artiste_id'])) {
-        $artiste_id = $_SESSION['user']['artiste_id'];
-    }
-
-    if (!$artiste_id) {
-        echo json_encode(['success' => false, 'message' => 'Identifiant artiste introuvable.']);
-        exit;
-    }
-
+try {
     $pdo = config::getConnexion();
+} catch (PDOException $e) {
+    die("Erreur de connexion à la base de données: " . $e->getMessage());
+}
 
-    $query = "UPDATE utilisateurs SET nom_utilisateur = :name WHERE artiste_id = :id";
-    $stmt = $pdo->prepare($query);
-    $stmt->bindParam(':name', $newUsername, PDO::PARAM_STR);
-    $stmt->bindParam(':id', $artiste_id, PDO::PARAM_INT);
+$userConnected = getUserInfo($pdo); // Récupère l'utilisateur connecté
 
-    if ($stmt->execute()) {
-        $_SESSION['user']['nom_utilisateur'] = $newUsername;
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $new_username = filter_input(INPUT_POST, 'nom_utilisateur', FILTER_SANITIZE_STRING);
 
-        echo json_encode(['success' => true]);
+    if (empty($new_username)) {
+        $_SESSION['error_message'] = "Le nom d'utilisateur ne peut pas être vide.";
     } else {
-        echo json_encode(['success' => false, 'message' => 'Erreur lors de la mise à jour du nom d\'utilisateur.']);
+        try {
+            $stmt = $pdo->prepare("UPDATE utilisateurs SET nom_utilisateur = ? WHERE artiste_id = ?");
+            $stmt->execute([
+                $new_username,
+                $userConnected->getArtisteId()
+            ]);
+
+            $_SESSION['success_message'] = "Nom d'utilisateur mis à jour avec succès !";
+            header('Location: avec_connexion.php');
+            exit();
+        } catch (PDOException $e) {
+            $_SESSION['error_message'] = "Erreur lors de la mise à jour : " . $e->getMessage();
+        }
     }
-} else {
-    echo json_encode(['success' => false, 'message' => 'Méthode non autorisée.']);
 }
 ?>

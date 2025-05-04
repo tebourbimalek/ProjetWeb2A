@@ -82,13 +82,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
             <p class="divider">OU</p>
 
-            <button class="social-login" type="button" data-provider="google">
-                Continuer avec Google
-            </button>
+            <button class="social-login" id="googleLoginBtn" type="button" data-provider="google">
+    Continuer avec Google
+</button>
+<script>
+document.getElementById('googleLoginBtn').addEventListener('click', function() {
+    window.location.href = 'LoginMethods/google-login.php';
+});
+</script>
 
-            <button class="social-login" type="button" data-provider="facebook">
-                Continuer avec Facebook
-            </button>
+
+<button class="social-login" type="button" id="facebook-login-btn" data-provider="facebook">
+    Continuer avec Facebook
+</button>
+
+<script>
+    document.getElementById("facebook-login-btn").addEventListener("click", function () {
+        window.location.href = "/projetweb/View/pages/tunisfy_sans_conexion/LoginMethods/fb-login.php";
+    });
+</script>
 
             <p class="register">
                 Vous n'avez pas de compte ? <a href="register.php">Inscrivez-vous</a>

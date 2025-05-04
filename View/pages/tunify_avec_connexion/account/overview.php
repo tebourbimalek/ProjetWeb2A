@@ -254,7 +254,7 @@ requireLogin();
                         <i class="fas fa-question-circle"></i>
                     </div>
                     <div class="settings-content">
-                        <div>Service d'assistance Spotify</div>
+                        <div>Service d'assistance Tunify</div>
                     </div>
                 </div>
                 <div class="arrow-icon">

@@ -1,87 +1,53 @@
 <?php
-// Start session for user authentication
 session_start();
 require_once 'C:\xampp\htdocs\projetweb\Model\includes\config.php';
 require_once 'C:\xampp\htdocs\projetweb\Model\includes\user.php';
 require_once 'C:\xampp\htdocs\projetweb\controller\controller.php';
 
-// Initialize database connection
 try {
     $pdo = config::getConnexion();
 } catch (PDOException $e) {
     die("Erreur de connexion à la base de données: " . $e->getMessage());
 }
-// Get current user using the provided function
+
 $userConnected = getUserInfo($pdo);
 
-// Handle form submission for profile update
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
     $prenom = filter_input(INPUT_POST, 'prenom', FILTER_SANITIZE_STRING);
     $nom_famille = filter_input(INPUT_POST, 'nom_famille', FILTER_SANITIZE_STRING);
-    $bio = filter_input(INPUT_POST, 'bio', FILTER_SANITIZE_STRING);
-    $marketing_consent = isset($_POST['marketing_consent']) ? 1 : 0;
-    
-    // Parse date of birth if needed to update
+    $nom_utilisateur = filter_input(INPUT_POST, 'nom_utilisateur', FILTER_SANITIZE_STRING);
+
+    // Traitement de la date de naissance
     $date_naissance = null;
     if (!empty($_POST['birth_day']) && !empty($_POST['birth_month']) && !empty($_POST['birth_year'])) {
-        // Convert month name to number
         $months = [
             'Janvier' => '01', 'Février' => '02', 'Mars' => '03', 'Avril' => '04',
             'Mai' => '05', 'Juin' => '06', 'Juillet' => '07', 'Août' => '08',
             'Septembre' => '09', 'Octobre' => '10', 'Novembre' => '11', 'Décembre' => '12'
         ];
-        
         $month_num = $months[$_POST['birth_month']] ?? '01';
         $date_naissance = $_POST['birth_year'] . '-' . $month_num . '-' . str_pad($_POST['birth_day'], 2, '0', STR_PAD_LEFT);
     }
-    
-    // Handle profile image upload
-    $image_path = $userConnected->getImagePath();
-    if (isset($_FILES['profile_image']) && $_FILES['profile_image']['error'] === UPLOAD_ERR_OK) {
-        $upload_dir = __DIR__ . '/uploads/profile_images/';
-        if (!is_dir($upload_dir)) {
-            mkdir($upload_dir, 0755, true); // Ensure the directory exists
-        }
-        $file_ext = strtolower(pathinfo($_FILES['profile_image']['name'], PATHINFO_EXTENSION));
-        $new_filename = uniqid('profile_') . '.' . $file_ext;
-        $upload_file = $upload_dir . $new_filename;
 
-        // Check if file is an image
-        $allowed_types = ['jpg', 'jpeg', 'png', 'gif'];
-        if (in_array($file_ext, $allowed_types)) {
-            if (move_uploaded_file($_FILES['profile_image']['tmp_name'], $upload_file)) {
-                $image_path = 'uploads/profile_images/' . $new_filename;
-            } else {
-                $_SESSION['error_message'] = "Erreur lors du téléchargement de l'image.";
-            }
-        } else {
-            $_SESSION['error_message'] = "Type de fichier non valide. Seuls les fichiers JPG, JPEG, PNG et GIF sont autorisés.";
-        }
-    }
-    
-    // Update user in database
+    // Mise à jour de l'utilisateur
     try {
         $stmt = $pdo->prepare("UPDATE utilisateurs SET 
             email = ?, 
             prenom = ?, 
-            nom_famille = ?, 
-            date_naissance = ?, 
-            image_path = ? 
+            nom_famille = ?,
+            nom_utilisateur = ?,
+            date_naissance = ?
             WHERE artiste_id = ?");
-            
         $stmt->execute([
-            $email, 
-            $prenom, 
-            $nom_famille, 
-            $date_naissance ?? $userConnected->getDateNaissance(), 
-            $image_path,
+            $email,
+            $prenom,
+            $nom_famille,
+            $nom_utilisateur, 
+            $date_naissance ?? $userConnected->getDateNaissance(),
             $userConnected->getArtisteId()
         ]);
-        
-        // Save bio to a separate table if needed
-        // This would depend on your database structure
-        
+
         $_SESSION['success_message'] = "Profil mis à jour avec succès!";
         header('Location: ' . $_SERVER['PHP_SELF']);
         exit();
@@ -90,23 +56,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Parse birth date for form display
+// Préparation pour afficher la date actuelle
 $birth_date = new DateTime($userConnected->getDateNaissance());
 $birth_day = $birth_date->format('j');
 $birth_month_num = $birth_date->format('n');
 $birth_year = $birth_date->format('Y');
 
-// Convert month number to name
 $month_names = [
     1 => 'Janvier', 2 => 'Février', 3 => 'Mars', 4 => 'Avril',
     5 => 'Mai', 6 => 'Juin', 7 => 'Juillet', 8 => 'Août',
     9 => 'Septembre', 10 => 'Octobre', 11 => 'Novembre', 12 => 'Décembre'
 ];
 $birth_month = $month_names[$birth_month_num] ?? 'Janvier';
-
-// Get user bio from separate table if needed
-$bio = ''; // Replace with actual query to get bio if needed
 ?>
+
 
 <!DOCTYPE html>
 <html lang="fr">
@@ -121,7 +84,7 @@ $bio = ''; // Replace with actual query to get bio if needed
     <div class="header">
         <div class="logo">
             <a href="/projetweb/index.php">
-                <img src="/projetweb/assets/images/logo/tunisfy-logo.png" alt="Tunisfy">
+                <img src="/projetweb/assets/img/logo.png" alt="Logo">
             </a>
         </div>
         <div class="nav-links">
@@ -148,14 +111,7 @@ $bio = ''; // Replace with actual query to get bio if needed
         <h1>Modifier le profil</h1>
         
         <form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="POST" enctype="multipart/form-data">
-            <div class="avatar-section">
-                <div class="avatar">
-                    <?php $profile_image = $userConnected->getImagePath() ? '/projetweb/' . $userConnected->getImagePath() : '/uploads/profile_images/default-avatar.png'; ?>
-                    <img id="profile-image-preview" src="<?php echo htmlspecialchars($profile_image); ?>" alt="Photo de profil">
-                </div>
-                <input type="file" id="profile_image" name="profile_image" style="display:none" accept="image/jpeg,image/png,image/gif">
-                <button type="button" class="upload-btn" onclick="document.getElementById('profile_image').click()">Changer la photo</button>
-            </div>
+            
             
             <div class="name-fields">
                 <div class="form-group">
@@ -170,9 +126,9 @@ $bio = ''; // Replace with actual query to get bio if needed
             </div>
             
             <div class="form-group">
-                <label for="username">Nom d'utilisateur</label>
-                <input type="text" id="username" name="username" value="<?php echo htmlspecialchars($userConnected->getNomUtilisateur()); ?>" readonly>
-                <small>L'identifiant unique ne peut pas être modifié</small>
+            <label for="nom_utilisateur">Nom d'utilisateur :</label>
+            <input type="text" name="nom_utilisateur" id="nom_utilisateur" value="<?= htmlspecialchars($userConnected->getNomUtilisateur()) ?>" required> 
+                
             </div>
 
             <div class="form-group">
@@ -180,10 +136,7 @@ $bio = ''; // Replace with actual query to get bio if needed
                 <input type="email" id="email" name="email" value="<?php echo htmlspecialchars($userConnected->getEmail()); ?>" required>
             </div>
 
-            <div class="form-group">
-                <label for="bio">Biographie</label>
-                <textarea id="bio" name="bio" rows="4" placeholder="Partagez quelque chose à propos de vous"><?php echo htmlspecialchars($bio); ?></textarea>
-            </div>
+            
 
             <div class="form-group">
                 <label>Date de naissance</label>
@@ -217,7 +170,7 @@ $bio = ''; // Replace with actual query to get bio if needed
     <footer>
         <div class="footer-content">
             <div class="footer-column">
-                <img src="/projetweb/assets/images/logo/tunisfy-logo.png" alt="Tunisfy" style="height: 40px; margin-bottom: 20px;">
+                <img src="/projetweb/assets/img/logo.png" alt="Logo" style="height: 40px; margin-bottom: 20px;">
                 <div class="social-icons">
                     <a href="#"><img src="/projetweb/assets/images/icons/instagram.svg" alt="Instagram"></a>
                     <a href="#"><img src="/projetweb/assets/images/icons/twitter.svg" alt="Twitter"></a>
@@ -511,18 +464,6 @@ $bio = ''; // Replace with actual query to get bio if needed
             flex: 1;
         }
     </style>
-    <script>
-        // Preview uploaded profile image
-        document.getElementById('profile_image').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById('profile-image-preview').src = e.target.result;
-                }
-                reader.readAsDataURL(file);
-            }
-        });
-    </script>
+    
 </body>
 </html>

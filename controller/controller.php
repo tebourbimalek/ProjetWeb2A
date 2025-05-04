@@ -108,6 +108,7 @@ function getUserInfo($pdo) {
     }
 
     $userId = $_SESSION['user'];
+
     $stmt = $pdo->prepare("SELECT * FROM utilisateurs WHERE artiste_id = ?");
     $stmt->execute([$userId]);
 
@@ -121,7 +122,7 @@ function getUserInfo($pdo) {
             $user['mot_de_passe'],
             $user['prenom'],
             $user['nom_famille'],
-            $user['date_naissance'],
+            $user['date_naissance']?? '',
             $user['image_path'],
             $user['type_utilisateur'],
             $user['score'],
@@ -132,6 +133,7 @@ function getUserInfo($pdo) {
         exit;
     }
 }
+
 function checkIfAdmin($pdo): User {
     if (!isset($_SESSION['user'])) {
         header("Location: /projetweb/pages/tunisfy_sans_conexion/login.php");

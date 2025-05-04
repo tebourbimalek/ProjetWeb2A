@@ -486,8 +486,15 @@ requireLogin();
                 <span class="setting-label">Edit login methods</span>
             </div>
             <div class="setting-action">
-                <button class="edit-button">Edit <i class="fas fa-external-link-alt"></i></button>
-            </div>
+    <button class="edit-button" onclick="openLoginMethods()">Edit <i class="fas fa-external-link-alt"></i></button>
+</div>
+<script>
+    function openLoginMethods() {
+    // Redirige vers la page login-methods.php en utilisant un chemin relatif
+    window.location.href = "/projetweb/View/pages/tunify_avec_connexion/account/login-methods.php";
+}
+
+</script>
         </div>
     </div>
 
@@ -1524,7 +1531,7 @@ function closeSettingsSection() {
                 </div>
                 
                 <div class="profile-input-field">
-                    <input type="text" id="username" value="<?= htmlspecialchars($user->getNomUtilisateur()) ?>">
+                    <input type="text" id="nom_utilisateur" value="<?= htmlspecialchars($user->getNomUtilisateur()) ?>">
                 </div>
                 
                 <div class="disclaimer">
@@ -1575,40 +1582,23 @@ function closeSettingsSection() {
     }
     
     function saveProfileChanges() {
-    const newUsername = document.getElementById('username').value;
-    
-    fetch('update_username.php', {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body: `username=${encodeURIComponent(newUsername)}`
-})
-.then(response => {
-    if (!response.ok) {
-        throw new Error('HTTP error! status: ' + response.status);
-    }
-    return response.text(); // Read response as text
-})
-.then(text => {
-    try {
-        const data = JSON.parse(text); // Attempt to parse JSON
-        if (data.success) {
-            document.querySelector('.profile-name').textContent = newUsername;
-            closeEditProfileModal();
-        } else {
-            alert('Failed to update username: ' + data.message);
-        }
-    } catch (error) {
-        console.error('Invalid JSON response:', text);
-        alert('An unexpected error occurred. Please try again later.');
-    }
-})
-.catch(error => {
-    console.error('Error:', error);
-    alert('An error occurred while updating your profile.');
-});
+    const nomUtilisateur = document.getElementById('nom_utilisateur').value;
+
+    // Crée un formulaire et l'envoie dynamiquement
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = 'update_username.php';
+
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'nom_utilisateur';
+    input.value = nomUtilisateur;
+
+    form.appendChild(input);
+    document.body.appendChild(form);
+    form.submit();
 }
+
 
 </script>
 <style>
