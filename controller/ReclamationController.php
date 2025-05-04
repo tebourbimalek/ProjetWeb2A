@@ -1,6 +1,10 @@
 <?php
 require_once "C:/xampp/htdocs/Tunify/config.php";
 require_once "C:/xampp/htdocs/Tunify/model/Reclamation.php";
+require_once "C:/xampp/htdocs/Tunify/controller/TypeReclamationController.php";
+require_once 'C:/xampp/htdocs/Tunify/vendor/autoload.php';
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
 class ReclamationController
 {
@@ -21,10 +25,16 @@ class ReclamationController
                 }
             }
 
+            // Get type_id from cause if it's a numeric value
+            $type_id = null;
+            if (isset($data['type_id']) && is_numeric($data['type_id'])) {
+                $type_id = (int)$data['type_id'];
+            }
+
             $stmt = $pdo->prepare(
                 "INSERT INTO reclamations 
-                (full_name, email, cause, description, screenshot, status, created_at) 
-                VALUES (?, ?, ?, ?, ?, 'pending', NOW())"
+                (full_name, email, cause, description, screenshot, status, created_at, type_id) 
+                VALUES (?, ?, ?, ?, ?, 'pending', NOW(), ?)"
             );
 
             $success = $stmt->execute([
@@ -32,7 +42,8 @@ class ReclamationController
                 $data['email'],
                 $data['cause'],
                 $data['description'],
-                $screenshotPath
+                $screenshotPath,
+                $type_id
             ]);
 
             if ($success && $this->sendConfirmationEmail($data['email'], $data['full_name'])) {
@@ -253,10 +264,40 @@ class ReclamationController
      * @param string $name Recipient name
      * @return bool True if email sent successfully
      */
-    private function sendConfirmationEmail($email, $name)
+    private function sendConfirmationEmail($email, $nom)
     {
-        // This is a placeholder - implement actual email sending logic
-        // For example, using PHP's mail() function or a library like PHPMailer
-        return true;
+        $mail = new PHPMailer(true);
+    
+        try {
+            $mail->isSMTP();
+            $mail->Host = 'smtp.gmail.com'; 
+            $mail->SMTPAuth = true;
+            $mail->Username = 'tbenalaya81@gmail.com'; 
+            $mail->Password = 'kyqt qnrg axfm joes';
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->Port = 587;
+    
+            $mail->setFrom('tbenalaya81@gmail.com', 'Support Client'); 
+            $mail->addAddress($email, $nom); 
+    
+            $mail->isHTML(true);
+            $mail->Subject = 'Confirmation de reception de votre reclamation';
+            $mail->Body = "
+                <p>Hello <strong>$nom</strong>,</p>
+                <p>We have received your complaint. Our team will contact you shortly for follow-up.</p>
+                <p>Thank you for your trust.</p>
+            ";
+    
+            if ($mail->send()) {
+                return true; 
+            } else {
+                return false; 
+            }
+    
+        } catch (Exception $e) {
+            error_log("Erreur lors de l'envoi de l'email : {$mail->ErrorInfo}");
+            return false; 
+        }
     }
+
 }

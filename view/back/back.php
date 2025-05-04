@@ -2,6 +2,8 @@
 require_once "C:/xampp/htdocs/Tunify/Config.php";
 require_once "C:/xampp/htdocs/Tunify/model/Reclamation.php";
 require_once "C:/xampp/htdocs/Tunify/controller/GestionReclamationController.php";
+require_once "C:/xampp/htdocs/Tunify/controller/TypeReclamationController.php";
+
 
 $page = isset($_GET['page']) ? $_GET['page'] : 'dashboard';
 $reclamationId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
@@ -12,7 +14,7 @@ function renderHeader($title) {
     <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="viewport" content="width=device-width, initial-scale: 1.0">
         <title>Tunify Admin - <?php echo $title; ?></title>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -423,6 +425,24 @@ function renderHeader($title) {
             }
 
             .btn-primary:hover {
+                background-color: var(--primary-dark);
+                transform: scale(1.02);
+                box-shadow: 0 5px 15px rgba(155, 93, 229, 0.4);
+            }
+
+            .dashboard-header .btn-primary {
+                background-color: var(--primary);
+                color: white;
+                border: none;
+                padding: 0.6rem 1.2rem;
+                border-radius: 50px;
+                font-weight: 600;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+
+            .dashboard-header .btn-primary:hover {
                 background-color: var(--primary-dark);
                 transform: scale(1.02);
                 box-shadow: 0 5px 15px rgba(155, 93, 229, 0.4);
@@ -840,6 +860,63 @@ function renderFooter() {
                 throw error;
             }
         }
+
+        // Add Type button handler
+        document.getElementById('addTypeBtn')?.addEventListener('click', function() {
+            Swal.fire({
+                title: 'Add New Reclamation Type',
+                input: 'text',
+                inputPlaceholder: 'Enter type name...',
+                showCancelButton: true,
+                confirmButtonColor: '#9b5de5',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Add Type',
+                inputValidator: (value) => {
+                    if (!value || value.trim() === '') {
+                        return 'Type name cannot be empty';
+                    }
+                }
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        const formData = new FormData();
+                        formData.append('type', result.value.trim());
+                        
+                        const response = await fetch('http://localhost/Tunify/controller/add_reclamation_type.php', {
+                            method: 'POST',
+                            body: formData
+                        });
+                        
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! Status: ${response.status}`);
+                        }
+                        
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            Swal.fire({
+                                title: 'Success!',
+                                text: 'Reclamation type added successfully',
+                                icon: 'success'
+                            }).then(() => window.location.reload());
+                        } else {
+                            Swal.fire({
+                                title: 'Error!',
+                                text: data.message || 'Failed to add reclamation type',
+                                icon: 'error'
+                            });
+                        }
+                    } catch (error) {
+                        console.error('Error adding type:', error);
+                        Swal.fire({
+                            title: 'Network Error',
+                            text: 'Failed to connect to the server. Please check your connection.',
+                            icon: 'error'
+                        });
+                    }
+                }
+            });
+        });
     });
     </script>
     </body>
@@ -876,6 +953,9 @@ function renderDashboardPage() {
     <div class="container">
         <div class="dashboard-header">
             <h1><i class="fas fa-comment-alt"></i> Reclamations Dashboard</h1>
+            <button type="button" id="addTypeBtn" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Add Reclamation Type
+            </button>
         </div>
 
         <div class="stats-container">

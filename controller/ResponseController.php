@@ -3,6 +3,7 @@ require_once "C:/xampp/htdocs/Tunify/config.php";
 require_once "C:/xampp/htdocs/Tunify/model/Response.php";
 require_once "C:/xampp/htdocs/Tunify/model/Reclamation.php";
 
+
 class ResponseController {
     private $pdo;
 
@@ -52,5 +53,6 @@ class ResponseController {
             return false;
         }
     }
+
 }
 ?>

@@ -12,6 +12,7 @@ error_log("Request Method: " . $_SERVER['REQUEST_METHOD']);
 require_once "C:/xampp/htdocs/Tunify/config.php";
 require_once "C:/xampp/htdocs/Tunify/model/Reclamation.php";
 require_once "C:/xampp/htdocs/Tunify/controller/ReclamationController.php";
+require_once "C:/xampp/htdocs/Tunify/controller/TypeReclamationController.php";
 
 // Test database connection
 try {
@@ -1202,11 +1203,14 @@ function renderFormPage() {
                     <label for="cause" class="required-field">Reclamation Cause</label>
                     <select id="cause" name="cause">
                         <option value="">Select a cause...</option>
-                        <option value="technical">Technical Issue</option>
-                        <option value="billing">Billing Problem</option>
-                        <option value="account">Account Issue</option>
-                        <option value="content">Content Concern</option>
-                        <option value="other">Other</option>
+                        <?php
+                        // Get all reclamation types
+                        $typeController = new TypeReclamationController();
+                        $types = $typeController->listeTypes();
+                        foreach ($types as $type) {
+                            echo '<option value="' . htmlspecialchars($type->type) . '">' . htmlspecialchars($type->type) . '</option>';
+                        }
+                        ?>
                     </select>
                 </div>
 
