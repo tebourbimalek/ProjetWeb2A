@@ -1,0 +1,17 @@
+{
+    "name": "user/projetweb",
+    "autoload": {
+        "psr-4": {
+            "User\\Projetweb\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "islemzibi",
+            "email": "islem.zribi@esprit.tn"
+        }
+    ],
+    "require": {
+        "phpmailer/phpmailer": "^6.10"
+    }
+}

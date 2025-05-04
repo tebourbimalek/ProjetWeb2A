@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Tunify</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="notifications.css">
+
+</head>
+
+<body>
+   
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <img src="image/logo1.png" alt="logo">
+            <a href="dashboard.html"><i class="fas fa-chart-line"></i><span>Dashboard</span></a>
+           <!-- Dans dashboard.html, près du user-profile -->
+           <div class="notification-icon" onclick="toggleNotifMenu()">
+            <i class="fas fa-bell"></i>
+            <span class="notification-badge">0</span>
+        </div>
+        
+        <div class="notification-dropdown" id="notif-list" style="display: none;">
+            <div class="notification-header">
+                <h4>Notifications</h4>
+                <button onclick="markAllAsRead()">Tout marquer comme lu</button>
+            </div>
+            <div class="notification-items" id="notification-container">
+                <!-- Les notifications seront chargées ici dynamiquement -->
+            </div>
+            <a href="notifications.html" class="view-all">Voir toutes les notifications</a>
+        </div>
+            
+            
+              
+        </div>
+    <div class="main-content">
+        <h1>Vos Notifications</h1>
+        
+        <div class="notification-filters">
+            <button class="active" data-filter="all">Toutes</button>
+            <button data-filter="unread">Non lues</button>
+            <button data-filter="payment">Paiements</button>
+        </div>
+        
+        <div class="notifications-list" id="full-notifications-container">
+            <!-- Toutes les notifications seront chargées ici -->
+        </div>
+    </div>
+
+    <script src="notifications.js"></script>
+</body>
+</html>
