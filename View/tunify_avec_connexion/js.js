@@ -1259,12 +1259,182 @@ document.getElementById("shareButton2").addEventListener("click", function() {
     }
 });
 
-document.addEventListener("click", function(event) {
-    const shareBox2 = document.getElementById("shareBox2");
-    const shareButton2 = document.getElementById("shareButton2");
+console.log("Script loaded");
 
-    // If the click is NOT inside the shareBox2 and not on the button
-    if (!shareBox2.contains(event.target) && !shareButton2.contains(event.target)) {
-        shareBox2.style.display = "none";
+window.addEventListener('DOMContentLoaded', () => {
+    const downloadButton = document.querySelector('.download-button');
+    console.log(downloadButton); // This should log the button
+
+    if (!downloadButton) return; // Safeguard if button not found
+
+    const progressRing = downloadButton.querySelector('.progress-ring');
+
+    downloadButton.addEventListener('click', function () {
+        // Show the loading circle and start the animation
+        progressRing.classList.add('show'); // This will display the progress ring and start the animation
+
+        const icon = downloadButton.querySelector('i');
+        icon.classList.add('spinner'); // You can add any additional spinner class for animation if you want
+
+        // Get playlist name (you can change this if needed)
+        const playlistTitleElement = document.querySelector('.playlist-title');
+        let playlistName = 'playlist_songs';
+
+        if (playlistTitleElement) {
+            playlistName = playlistTitleElement.textContent.trim().replace(/[^a-z0-9]/gi, '_');
+        }
+
+        // Create new JSZip instance
+        const zip = new JSZip();
+        const songs = [];
+
+        // Loop through all songs in the playlist
+        document.querySelectorAll('.song-row').forEach(row => {
+            const songURL = row.getAttribute('data-song-url');
+            const songTitle = row.getAttribute('data-song-title');
+            const songName = songTitle ? songTitle + '.mp3' : 'unknown_song.mp3';
+            const songCover = row.getAttribute('data-song-cover');
+            const songArtist = row.getAttribute('data-song-artiste');
+
+            console.log('Song Name:', songName);
+
+            songs.push({ name: songName, url: songURL, cover: songCover, artist: songArtist });
+        });
+
+        if (songs.length === 0) {
+        
+            progressRing.classList.remove('show'); // Hide animation if no songs found
+            return;
+        }
+
+        // Add songs to the ZIP folder
+        const folder = zip.folder(playlistName);
+        let songsAdded = 0;
+
+        // Function to fetch each song and add it to the ZIP
+        function addSongToZip(song, callback) {
+            fetch(song.url)
+                .then(response => response.blob())
+                .then(blob => {
+                    folder.file(song.name, blob);
+                    callback();
+                })
+                .catch(error => {
+                    console.error('Error downloading song:', song.name, error);
+                    callback();
+                });
+        }
+
+        // Loop through songs and add them to the ZIP
+        songs.forEach(song => {
+            addSongToZip(song, () => {
+                songsAdded++;
+                if (songsAdded === songs.length) {
+                    // Once all songs are added, generate the ZIP
+                    zip.generateAsync({ type: 'blob' }).then(content => {
+                        saveAs(content, playlistName + '.zip');
+                        progressRing.classList.remove('show'); // Hide loading animation after download is ready
+                    });
+                }
+            });
+        });
+    });
+});
+const searchInput = document.getElementById('global_search');
+const searchBtn = document.getElementById('searchBtn');
+const mainDiv = document.getElementById('box2-main');
+const mainDiv2 = document.getElementById('box2-expanded3');
+const resultsDiv = document.getElementById('resultsDiv');
+const playlist_div = document.getElementById('playlist_div');
+
+function performSearch() {
+    const query = searchInput.value.trim();
+    
+    if (query !== "") {
+        // Hide main divs and show results div
+        mainDiv.style.display = 'none';
+        playlist_div.style.display ='none';
+        resultsDiv.style.display = 'block';
+        mainDiv2.style.display = 'block';
+        fetch(`search_handler.php?query=${encodeURIComponent(query)}`)
+        .then(response => response.json())
+        .then(data => {
+            resultsDiv.innerHTML = ''; // Clear previous results
+
+            // Display utilisateur results
+            if (data.utilisateur && data.utilisateur.length > 0) {
+                const utilisateurSection = document.createElement('div');
+                utilisateurSection.innerHTML = `
+                    <h3 style="color: white;">Meilleur résultat</h3>
+                    <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 20px;">
+                        <img src="path/to/default-user-image.jpg" alt="User Image" style="width: 100px; height: 100px; border-radius: 50%;">
+                        <div>
+                            <p style="color: white; font-size: 20px; margin: 0;">${data.utilisateur[0].nom_utilisateur}</p>
+                            <p style="color: gray; margin: 0;">Artiste</p>
+                        </div>
+                        <button style="background-color: green; color: white; border: none; border-radius: 50%; width: 50px; height: 50px; cursor: pointer;">
+                            <i class="fa-solid fa-play"></i>
+                        </button>
+                    </div>
+                `;
+                resultsDiv.appendChild(utilisateurSection);
+            }
+
+            // Display chanson results
+            if (data.chanson && data.chanson.length > 0) {
+                const chansonSection = document.createElement('div');
+                chansonSection.innerHTML = `<h3 style="color: white;">Titres</h3>`;
+                data.chanson.forEach(song => {
+                    chansonSection.innerHTML += `
+                        <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 10px;">
+                            <img src="path/to/default-song-image.jpg" alt="Song Image" style="width: 50px; height: 50px; border-radius: 5px;">
+                            <div>
+                                <p style="color: white; margin: 0;">${song.titre || 'Titre inconnu'}</p>
+                                <p style="color: gray; margin: 0;">${song.artiste || 'Artiste inconnu'}</p>
+                            </div>
+                            <p style="color: gray; margin-left: auto;">${song.duree || '0:00'}</p>
+                        </div>
+                    `;
+                });
+                resultsDiv.appendChild(chansonSection);
+            }
+
+            // Display playlist results
+            if (data.playlist && data.playlist.length > 0) {
+                const playlistSection = document.createElement('div');
+                playlistSection.innerHTML = `<h3 style="color: white;">Playlists</h3>`;
+                data.playlist.forEach(playlist => {
+                    playlistSection.innerHTML += `
+                        <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 10px;">
+                            <img src="path/to/default-playlist-image.jpg" alt="Playlist Image" style="width: 50px; height: 50px; border-radius: 5px;">
+                            <p style="color: white; margin: 0;">${playlist.nom}</p>
+                        </div>
+                    `;
+                });
+                resultsDiv.appendChild(playlistSection);
+            }
+
+
+        })
+    } else {
+        // If search input is empty, show the main divs
+        mainDiv.style.display = 'block';
+        mainDiv2.style.display = 'block';
+        resultsDiv.style.display = 'none';
+    }
+}
+
+// Trigger on typing
+searchInput.addEventListener('input', () => {
+    performSearch();
+});
+
+// Trigger on click
+searchBtn.addEventListener('click', performSearch);
+
+// Trigger on Enter key press
+searchInput.addEventListener('keydown', (e) => {
+    if (e.key === "Enter") {
+        performSearch();
     }
 });
