@@ -1,0 +1,45 @@
+Array
+(
+    [0] => Array
+        (
+            [id_game] => 46
+            [nom_jeu] => quizzz
+            [type_jeu] => quizz
+        )
+
+    [1] => Array
+        (
+            [id_game] => 47
+            [nom_jeu] => GUESS THE ALBUM
+            [type_jeu] => guess
+        )
+
+    [2] => Array
+        (
+            [id_game] => 48
+            [nom_jeu] => GUESS THE SINGER
+            [type_jeu] => guess
+        )
+
+    [3] => Array
+        (
+            [id_game] => 49
+            [nom_jeu] => GUESS THE SONG
+            [type_jeu] => guess
+        )
+
+    [4] => Array
+        (
+            [id_game] => 50
+            [nom_jeu] => 3.1 ALL
+            [type_jeu] => quizz
+        )
+
+    [5] => Array
+        (
+            [id_game] => 51
+            [nom_jeu] => puzzle 
+            [type_jeu] => puzzle
+        )
+
+)

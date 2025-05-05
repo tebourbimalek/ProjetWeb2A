@@ -666,3 +666,112 @@ body {
         0% { transform: translateY(-50%) rotate(0deg); }
         100% { transform: translateY(-50%) rotate(360deg); }
     }
+/* Rewards Table Styling */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+}
+
+#rewards-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 30px;
+}
+
+#rewards-table th {
+    background-color: #2a2a3a;
+    padding: 30px 100px;
+    text-align: left;
+    position: sticky;
+    top: 0;
+}
+
+#rewards-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #444;
+    vertical-align: middle;
+}
+
+#rewards-table tr:hover {
+    background-color: #2a2a3a;
+}
+
+.no-image {
+    background: #2a2a3a;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+}
+
+.badge {
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.badge-success {
+    background-color: #28a745;
+    color: white;
+}
+
+.badge-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 30px;
+    color: #aaa;
+}
+
+.empty-state i {
+    color: #9c27b0;
+    margin-bottom: 15px;
+}
+
+.empty-state h5 {
+    margin: 10px 0;
+    color: white;
+}
+
+.empty-state p {
+    margin-bottom: 20px;
+}
+
+/* Form Styling */
+#add-reward-form {
+    background: #2a2a3a;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+#add-reward-form .form-group {
+    margin-bottom: 15px;
+}
+
+#add-reward-form label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+#add-reward-form .form-control {
+    width: 100%;
+    padding: 8px 12px;
+    background: #393944;
+    border: 1px solid #444;
+    border-radius: 4px;
+    color: white;
+}
+
+#reward-image-preview {
+    max-width: 100px;
+    margin-top: 10px;
+    display: none;
+}

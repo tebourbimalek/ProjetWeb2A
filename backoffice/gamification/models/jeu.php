@@ -72,5 +72,13 @@ class Jeu {
     
         return $stmt->execute();
     }
+    public function getActiveGame($id_game) {
+        $query = 'SELECT * FROM ' . $this->table . ' WHERE id_game = :id_game AND statut = "actif"';
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id_game', $id_game);
+        $stmt->execute();
+        
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
 }
 ?>

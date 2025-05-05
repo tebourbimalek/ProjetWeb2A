@@ -1,9 +1,11 @@
 <?php
 require_once 'config/database.php';
 require_once 'controllers/JeuxController.php';
+require_once 'models/recompense.php';
 
 $db = Database::connect();
 $controller = new JeuxController($db);
+
 
 if (isset($_GET['action'])) {
     $action = $_GET['action'];
@@ -32,6 +34,15 @@ if (isset($_GET['action'])) {
         case 'get_question':
             $controller->getQuestion();
             break;
+        case 'add_reward':
+            $recompensesController->add();
+            break;
+        case 'update_reward':
+            $recompensesController->update();
+            break;
+        case 'delete_reward':
+            $recompensesController->delete();
+            break;
         default:
             echo "Invalid action";
             break;
@@ -40,6 +51,7 @@ if (isset($_GET['action'])) {
 }
 
 $games = $controller->index();
+$rewards = $controller->indexRewards();
 ?>
 
 <!DOCTYPE html>
@@ -58,6 +70,7 @@ $games = $controller->index();
         <ul class="sidebar-menu">
             <li class="active" data-tab="dashboard"><i class="fas fa-home"></i> Dashboard</li>
             <li data-tab="jeux"><i class="fas fa-gamepad"></i> Jeux</li>
+            <li data-tab="recompenses"><i class="fas fa-gift"></i> Récompenses</li>
         </ul>
     </div>
 
@@ -190,6 +203,140 @@ $games = $controller->index();
             </div>
         </div>
     </div>
+    <div id="recompenses" class="tab-content">
+  <div class="content-section">
+    <div class="section-header">
+      <div class="section-title">Manage Rewards</div>
+      <button id="add-new-reward-btn" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Add New Reward
+      </button>
+    </div>
+
+    <!-- Add / Edit Reward Form -->
+    <form id="add-reward-form"
+          action="backoffice.php?action=add_reward" 
+          method="POST"
+          enctype="multipart/form-data"
+          style="display: none; margin-top: 20px;">
+      <input type="hidden" name="id_reward" id="edit-id-reward">
+
+      <div class="form-group">
+        <label>Reward Name:</label>
+        <input type="text" name="nom_reward" class="form-control" required>
+      </div>
+      <div class="form-group">
+        <label>Required Points:</label>
+        <input type="number" name="points_requis" class="form-control" required>
+      </div>
+      <div class="form-group">
+        <label>Type:</label>
+        <select name="type_reward" class="form-control" required>
+          <option value="">Select Type</option>
+          <option value="discount">Discount</option>
+          <option value="premium">Premium</option>
+          <option value="physical">Physical</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Availability:</label>
+        <select name="disponibilite" class="form-control" required>
+          <option value="1">Available</option>
+          <option value="0">Unavailable</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Image:</label>
+        <input type="file" name="image" class="form-control" accept="image/*">
+        <img id="reward-image-preview"
+             src=""
+             style="display: none; max-width: 200px; margin-top: 10px;">
+      </div>
+
+      <button type="submit" class="btn btn-success">Save Reward</button>
+      <button type="button"
+              class="btn btn-secondary"
+              onclick="document.getElementById('add-reward-form').style.display='none'">
+        Cancel
+      </button>
+    </form>
+
+    <div class="search-container" style="margin: 20px 0;">
+      <input type="text"
+             id="search-rewards"
+             placeholder="Search rewards..."
+             class="search-input">
+    </div>
+
+    <div class="table-responsive">
+      <table class="song-table" id="rewards-table" style="width:100%;">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Image</th>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Points</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php if (!empty($rewards) && is_array($rewards)): ?>
+            <?php foreach ($rewards as $reward): ?>
+              <tr>
+                <td><?= htmlspecialchars($reward['id_reward'] ?? '') ?></td>
+                <td>
+                  <?php if (!empty($reward['image_path'])): ?>
+                    <img src="/tunifiy(gamification)/sources/uploads/<?= htmlspecialchars($reward['image_path']) ?>" 
+                         width="50" height="50" 
+                         onerror="this.src='/tunifiy(gamification)/public/assets/default.jpg'">
+                  <?php else: ?>
+                    <div class="no-image">No Image</div>
+                  <?php endif; ?>
+                </td>
+                <td><?= htmlspecialchars($reward['nom_reward'] ?? 'N/A') ?></td>
+                <td><?= htmlspecialchars($reward['type_reward'] ?? 'N/A') ?></td>
+                <td><?= htmlspecialchars($reward['points_requis'] ?? 0) ?></td>
+                <td>
+                  <span class="badge <?= ($reward['disponibilite'] ?? 0) ? 'badge-success' : 'badge-danger' ?>">
+                    <?= ($reward['disponibilite'] ?? 0) ? 'Available' : 'Unavailable' ?>
+                  </span>
+                </td>
+                <td>
+                  <div class="action-buttons">
+                    <button class="btn btn-sm btn-danger delete-reward"
+                            data-id="<?= (int)($reward['id_reward'] ?? 0) ?>">
+                      <i class="fas fa-trash"></i> Delete
+                    </button>
+                    <button class="btn btn-sm btn-primary edit-reward"
+                            data-id="<?= (int)($reward['id_reward'] ?? 0) ?>"
+                            data-nom="<?= htmlspecialchars($reward['nom_reward'] ?? '') ?>"
+                            data-points="<?= (int)($reward['points_requis'] ?? 0) ?>"
+                            data-type="<?= htmlspecialchars($reward['type_reward'] ?? '') ?>"
+                            data-dispo="<?= (int)($reward['disponibilite'] ?? 0) ?>"
+                            data-image="<?= htmlspecialchars($reward['image_path'] ?? '') ?>">
+                      <i class="fas fa-edit"></i> Edit
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            <?php endforeach; ?>
+          <?php else: ?>
+            <tr>
+              <td colspan="7" class="text-center py-4">
+                <div class="empty-state">
+                  <i class="fas fa-gift fa-3x"></i>
+                  <h5>No rewards found</h5>
+                  <p>Start by adding your first reward</p>
+                </div>
+              </td>
+            </tr>
+          <?php endif; ?>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
 
     <script src="/tunifiy(gamification)/backoffice/gamification/public/assets/js/backoffice.js"></script>
 </body>

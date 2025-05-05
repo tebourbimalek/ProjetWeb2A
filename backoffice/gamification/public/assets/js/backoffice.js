@@ -25,7 +25,12 @@ const elements = {
     currentGameType: document.getElementById('current-game-type'),
     questionFormContainer: document.getElementById('question-form-container'),
     gamesSection: document.getElementById('games-section'),
-    questionsSection: document.getElementById('questions-section')
+    questionsSection: document.getElementById('questions-section'),
+    // Reward elements
+    addRewardBtn: document.getElementById('add-new-reward-btn'),
+    addRewardForm: document.getElementById('add-reward-form'),
+    editRewardIdField: document.getElementById('edit-id-reward'),
+    rewardsTable: document.getElementById('rewards-table')
 };
 
 // Initialization
@@ -33,6 +38,13 @@ document.addEventListener("DOMContentLoaded", () => {
     initTabNavigation();
     initGameHandlers();
     initQuestionHandlers();
+    initRewardHandlers();
+    
+    // Initialize search functionality
+    const searchGamesInput = document.getElementById('search-games');
+    if (searchGamesInput) {
+        searchGamesInput.addEventListener('input', handleGameSearch);
+    }
 });
 
 // Tab Navigation
@@ -50,8 +62,11 @@ function initTabNavigation() {
                 }
             });
 
+            // Toggle appropriate buttons based on selected tab
             elements.addGameBtn.style.display = selectedTab === "jeux" ? "inline-block" : "none";
             elements.addGameForm.style.display = "none";
+            elements.addRewardBtn.style.display = selectedTab === "recompenses" ? "inline-block" : "none";
+            elements.addRewardForm.style.display = "none";
         });
     });
 }
@@ -75,6 +90,11 @@ function initGameHandlers() {
     // Edit Game
     document.querySelectorAll(".edit-game").forEach(btn => {
         btn.addEventListener("click", handleEditGame);
+    });
+
+    // Show Questions
+    document.querySelectorAll('.show-questions').forEach(button => {
+        button.addEventListener('click', handleShowQuestions);
     });
 }
 
@@ -108,11 +128,6 @@ function handleEditGame() {
 
 // Question Management
 function initQuestionHandlers() {
-    // Show Questions
-    document.querySelectorAll('.show-questions').forEach(button => {
-        button.addEventListener('click', handleShowQuestions);
-    });
-
     // Add Question
     elements.addQuestionBtn.addEventListener('click', handleAddQuestion);
 
@@ -267,30 +282,25 @@ function getQuestionFormHTML(gameType, question = null) {
     const getValue = (field) => question ? question[field] || '' : '';
     const isChecked = (field) => question && question[field] ? 'checked' : '';
     
-    switch (gameType) {
+    let formHTML = `
+        <div class="form-group">
+            <label>Question Text:</label>
+            <input type="text" name="question_text" class="form-control" value="${getValue('question_text')}" required>
+        </div>
+    `;
+
+    switch(gameType) {
         case 'guess':
-            return `
-                <div class="form-group">
-                    <label>Question Text:</label>
-                    <input type="text" name="question_text" class="form-control" value="${getValue('question_text')}" required>
-                </div>
+            formHTML += `
                 <div class="form-group">
                     <label>Correct Answer:</label>
                     <input type="text" name="correct_answer" class="form-control" value="${getValue('correct_answer')}" required>
                 </div>
-                <div class="form-group">
-                    <label>Image:</label>
-                    <input type="file" name="image" accept="image/*" class="form-control">
-                    ${question && question.image_path ? `<img src="${config.imageBasePath}${question.image_path}" width="100" style="margin-top:10px;">` : ''}
-                </div>
             `;
+            break;
             
         case 'quizz':
-            return `
-                <div class="form-group">
-                    <label>Question Text:</label>
-                    <input type="text" name="question_text" class="form-control" value="${getValue('question_text')}" required>
-                </div>
+            formHTML += `
                 <div class="form-group">
                     <label>Option 1:</label>
                     <input type="text" name="option_1" class="form-control" value="${getValue('option_1')}" required>
@@ -316,26 +326,40 @@ function getQuestionFormHTML(gameType, question = null) {
                         <option value="4" ${getValue('correct_option') == 4 ? 'selected' : ''}>Option 4</option>
                     </select>
                 </div>
-                <div class="form-group">
-                    <label>Image:</label>
-                    <input type="file" name="image" accept="image/*" class="form-control">
-                    ${question && question.image_path ? `<img src="${config.imageBasePath}${question.image_path}" width="100" style="margin-top:10px;">` : ''}
-                </div>
             `;
+            break;
             
         case 'puzzle':
-            return `
+            formHTML += `
                 <div class="form-group">
-                    <label>Image:</label>
-                    <input type="file" name="image" accept="image/*" class="form-control" ${!question ? 'required' : ''}>
-                    ${question && question.image_path ? `<img src="${config.imageBasePath}${question.image_path}" width="100" style="margin-top:10px;">` : ''}
-                </div>
-                <div class="form-group">
-                    <label>Is True?</label>
-                    <input type="checkbox" name="is_true" class="form-control" ${isChecked('is_true')}>
+                    <label>Is Correct (for true/false puzzles):</label>
+                    <select name="is_true" class="form-control">
+                        <option value="1" ${isChecked('is_true')}>True</option>
+                        <option value="0" ${!isChecked('is_true')}>False</option>
+                    </select>
                 </div>
             `;
+            break;
     }
+
+    // Common media fields for all question types
+    formHTML += `
+        <div class="form-group">
+            <label>Image (optional):</label>
+            <input type="file" name="image" accept="image/*" class="form-control">
+            ${question && question.image_path ? `<img src="${config.imageBasePath}${question.image_path}" width="100" style="margin-top:10px;">` : ''}
+        </div>
+        <div class="form-group">
+            <label>Audio File (MP3 - optional):</label>
+            <input type="file" name="mp3" accept="audio/mp3" class="form-control">
+            ${question && question.mp3_path ? `
+                <audio controls src="/tunifiy(gamification)/sources/uploads/audio/${question.mp3_path}" style="width:100%; margin-top:10px;"></audio>
+                <small class="text-muted">Current file: ${question.mp3_path}</small>
+            ` : ''}
+        </div>
+    `;
+
+    return formHTML;
 }
 
 // Question CRUD Operations
@@ -349,20 +373,26 @@ function loadQuestionsForGame(gameId) {
 }
 
 function renderQuestionsTable(questions, gameType) {
-    if (questions.length === 0) {
+    if (!questions || questions.length === 0) {
         return '<tr><td colspan="5" style="text-align:center;">No questions found.</td></tr>';
     }
 
     return questions.map(q => {
         const imagePath = q.image_path ? `${config.imageBasePath}${q.image_path}` : '';
+        const audioPath = q.mp3_path ? `/tunifiy(gamification)/sources/uploads/audio/${q.mp3_path}` : '';
         
+        // Safely escape HTML and handle undefined values
+        const safeEscape = (value) => {
+            return value ? escapeHtml(value) : '';
+        };
+
         switch(gameType) {
             case 'guess':
                 return `
                     <tr>
                         <td>${q.id_question}</td>
-                        <td>${escapeHtml(q.question_text)}</td>
-                        <td>${escapeHtml(q.correct_answer)}</td>
+                        <td>${safeEscape(q.question_text)}</td>
+                        <td>${safeEscape(q.correct_answer)}</td>
                         <td>${imagePath ? `<img src="${imagePath}" width="50">` : 'No image'}</td>
                         <td>
                             <button class="btn btn-warning modify-question" data-id="${q.id_question}">Edit</button>
@@ -374,13 +404,13 @@ function renderQuestionsTable(questions, gameType) {
                 return `
                     <tr>
                         <td>${q.id_question}</td>
-                        <td>${escapeHtml(q.question_text)}</td>
+                        <td>${safeEscape(q.question_text)}</td>
                         <td>
                             <ol>
-                                <li class="${q.correct_option == 1 ? 'text-success' : ''}">${escapeHtml(q.option_1)}</li>
-                                <li class="${q.correct_option == 2 ? 'text-success' : ''}">${escapeHtml(q.option_2)}</li>
-                                <li class="${q.correct_option == 3 ? 'text-success' : ''}">${escapeHtml(q.option_3)}</li>
-                                <li class="${q.correct_option == 4 ? 'text-success' : ''}">${escapeHtml(q.option_4)}</li>
+                                <li class="${q.correct_option == 1 ? 'text-success' : ''}">${safeEscape(q.option_1)}</li>
+                                <li class="${q.correct_option == 2 ? 'text-success' : ''}">${safeEscape(q.option_2)}</li>
+                                <li class="${q.correct_option == 3 ? 'text-success' : ''}">${safeEscape(q.option_3)}</li>
+                                <li class="${q.correct_option == 4 ? 'text-success' : ''}">${safeEscape(q.option_4)}</li>
                             </ol>
                         </td>
                         <td>${imagePath ? `<img src="${imagePath}" width="50">` : 'No image'}</td>
@@ -394,6 +424,7 @@ function renderQuestionsTable(questions, gameType) {
                 return `
                     <tr>
                         <td>${q.id_question}</td>
+                        <td>${safeEscape(q.question_text)}</td>
                         <td>${imagePath ? `<img src="${imagePath}" width="100">` : 'No image'}</td>
                         <td>${q.is_true ? 'True' : 'False'}</td>
                         <td>
@@ -404,6 +435,89 @@ function renderQuestionsTable(questions, gameType) {
                 `;
         }
     }).join('');
+}
+
+// Reward CRUD Operations
+function initRewardHandlers() {
+    // Add Reward Form Toggle
+    if (elements.addRewardBtn) {
+        elements.addRewardBtn.addEventListener("click", () => {
+            elements.addRewardForm.reset();
+            elements.editRewardIdField.value = "";
+            elements.addRewardForm.action = `${config.baseURL}?action=add_reward`;
+            elements.addRewardForm.querySelector("button[type='submit']").textContent = "Ajouter Récompense";
+            document.getElementById('reward-image-preview').style.display = 'none';
+            elements.addRewardForm.style.display = elements.addRewardForm.style.display === "none" ? "block" : "none";
+        });
+    }
+
+    // Delete Reward
+    document.querySelectorAll(".delete-reward").forEach(btn => {
+        btn.addEventListener("click", handleDeleteReward);
+    });
+
+    // Edit Reward
+    document.querySelectorAll(".edit-reward").forEach(btn => {
+        btn.addEventListener("click", handleEditReward);
+    });
+
+    // Add First Reward button
+    document.getElementById('add-first-reward')?.addEventListener('click', () => {
+        elements.addRewardBtn.click();
+    });
+}
+
+function handleDeleteReward() {
+    const id = this.getAttribute("data-id");
+    if (confirm("Êtes-vous sûr de vouloir supprimer cette récompense ?")) {
+        fetch(`${config.baseURL}?action=delete_reward`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: `id_reward=${encodeURIComponent(id)}`
+        })
+        .then(handleResponse)
+        .then(() => this.closest("tr").remove())
+        .catch(handleError("Échec de la suppression"));
+    }
+}
+
+function handleEditReward() {
+    const row = this.closest("tr");
+    elements.addRewardForm.style.display = "block";
+    elements.editRewardIdField.value = this.getAttribute("data-id");
+    elements.addRewardForm.querySelector('[name="nom_reward"]').value = this.getAttribute("data-nom");
+    elements.addRewardForm.querySelector('[name="points_requis"]').value = this.getAttribute("data-points");
+    elements.addRewardForm.querySelector('[name="type_reward"]').value = this.getAttribute("data-type");
+    elements.addRewardForm.querySelector('[name="disponibilite"]').value = this.getAttribute("data-dispo");
+    
+    const imagePath = this.getAttribute("data-image");
+    const imagePreview = document.getElementById('reward-image-preview');
+    if (imagePath) {
+        imagePreview.src = `${config.imageBasePath}${imagePath}`;
+        imagePreview.style.display = 'block';
+        imagePreview.style.maxWidth = '200px';
+        imagePreview.style.marginTop = '10px';
+    } else {
+        imagePreview.style.display = 'none';
+    }
+    
+    elements.addRewardForm.action = `${config.baseURL}?action=update_reward`;
+    elements.addRewardForm.querySelector("button[type='submit']").textContent = "Update Reward";
+}
+
+// Search Functionality
+function handleGameSearch() {
+    const searchTerm = this.value.toLowerCase();
+    const rows = document.querySelectorAll('#games-table tbody tr');
+    
+    rows.forEach(row => {
+        const gameName = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
+        const gameType = row.querySelector('td:nth-child(4)').textContent.toLowerCase();
+        const shouldShow = gameName.includes(searchTerm) || gameType.includes(searchTerm);
+        row.style.display = shouldShow ? '' : 'none';
+    });
 }
 
 // Helper Functions
@@ -423,57 +537,40 @@ function handleError(message) {
 }
 
 function escapeHtml(unsafe) {
-    return unsafe
+    if (!unsafe) return '';
+    return unsafe.toString()
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
 }
-const searchGamesInput = document.getElementById('search-games');
-if (searchGamesInput) {
-    searchGamesInput.addEventListener('input', function() {
-        const searchTerm = this.value.toLowerCase();
-        const rows = document.querySelectorAll('#games-table tbody tr');
-        
-        rows.forEach(row => {
-            const gameName = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
-            const gameType = row.querySelector('td:nth-child(4)').textContent.toLowerCase();
-            const shouldShow = gameName.includes(searchTerm) || gameType.includes(searchTerm);
-            row.style.display = shouldShow ? '' : 'none';
-        });
-    });
-}
-
-// Questions table search (only initialize when questions are shown)
-function initQuestionsSearch() {
-    const searchQuestionsInput = document.getElementById('search-questions');
-    if (searchQuestionsInput) {
-        searchQuestionsInput.addEventListener('input', function() {
-            const searchTerm = this.value.toLowerCase();
-            const rows = document.querySelectorAll('#questions-table-body tr');
-            
-            rows.forEach(row => {
-                const questionText = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
-                const shouldShow = questionText.includes(searchTerm);
-                row.style.display = shouldShow ? '' : 'none';
-            });
-        });
-    }
-}
-
-// Call this when showing questions section
-function loadQuestionsForGame(gameId) {
-    // Show questions search container
-    document.getElementById('questions-search-container').style.display = 'block';
+document.getElementById('add-reward-form')?.addEventListener('submit', async function(e) {
+    e.preventDefault();
     
-    // Your existing load questions code...
-    fetch(`${config.baseURL}?action=load_questions&id_game=${gameId}`)
-        .then(response => response.json())
-        .then(questions => {
-            elements.questionsBody.innerHTML = renderQuestionsTable(questions, state.currentGame.type);
-            // Initialize search after questions are loaded
-            initQuestionsSearch();
-        })
-        .catch(handleError("Failed to load questions"));
-}
+    const form = this;
+    const formData = new FormData(form);
+    
+    try {
+        const response = await fetch(form.action, {
+            method: 'POST',
+            body: formData
+        });
+
+        const result = await response.text();
+        
+        if (!response.ok) {
+            throw new Error(result || 'Server responded with status ' + response.status);
+        }
+
+        if (result !== 'success') {
+            throw new Error(result);
+        }
+
+        alert('Reward saved successfully!');
+        window.location.reload();
+    } catch (error) {
+        console.error('Error details:', error);
+        alert('Error saving reward: ' + error.message);
+    }
+});
