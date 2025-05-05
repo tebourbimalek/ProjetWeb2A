@@ -74,12 +74,14 @@ class CommentsController {
         $sql = "INSERT INTO commentaires (id_news, auteur, contenu, date_commentaire) 
                 VALUES (:id_news, :auteur, :contenu, :date_commentaire)";
         $db = config::getConnexion();
+        $cleanContenu = self::sanitizeComment($comment->getContenu());
         try {
             $query = $db->prepare($sql);
+            echo $cleanContenu;
             $query->execute([
                 'id_news' => $comment->getId_News(),
                 'auteur' => $comment->getAuteur(),
-                'contenu' => $comment->getContenu(),
+                'contenu' => $cleanContenu,
                 'date_commentaire' => $comment->getDate_Commentaire() ?? date('Y-m-d H:i:s')
             ]);
         } catch (Exception $e) {
@@ -132,4 +134,48 @@ class CommentsController {
             die('Error: ' . $e->getMessage());
         }
     }
+    private static function sanitizeComment(string $contenu): string {
+        $badWords = ['con', 'merde', 'putain', 'salope', 'enculé', 'batard', 'fuck', 'shit'];
+
+        foreach ($badWords as $word) {
+            $pattern = '/\b' . preg_quote($word, '/') . '\b/i';
+            $contenu = preg_replace_callback($pattern, function ($matches) {
+                return str_repeat('*', strlen($matches[0]));
+            }, $contenu);
+        }
+
+        return $contenu;
+    }
+    public function filterNews($keyword = '', $categorie = '', $date = '') {
+        $db = config::getConnexion();
+        $sql = "SELECT * FROM news WHERE 1=1";
+    
+        if (!empty($keyword)) {
+            $sql .= " AND (titre LIKE :kw OR contenu LIKE :kw)";
+        }
+        if (!empty($categorie)) {
+            $sql .= " AND categorie = :cat";
+        }
+        if (!empty($date)) {
+            $sql .= " AND DATE(date_publication) = :dp";
+        }
+    
+        $query = $db->prepare($sql);
+    
+        if (!empty($keyword)) {
+            $query->bindValue(':kw', '%' . $keyword . '%');
+        }
+        if (!empty($categorie)) {
+            $query->bindValue(':cat', $categorie);
+        }
+        if (!empty($date)) {
+            $query->bindValue(':dp', $date);
+        }
+    
+        $query->execute();
+        return $query->fetchAll(PDO::FETCH_ASSOC);
+    }
+    
 }
+
+
