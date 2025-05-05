@@ -1,6 +1,19 @@
 <?php 
 
 require_once 'displaysongs.php';
+<<<<<<< HEAD
+=======
+require_once 'C:\xampp\htdocs\islem\projetweb\controlleur\functionpaiments.php';
+
+$userId = 1;
+$unreadCount = countUnreadNotifications($userId);
+
+if ($unreadCount > 0) {
+    echo "<span class='badge'>$unreadCount</span>";
+} else {
+    echo "<span class='badge'>0</span>";
+}
+>>>>>>> 628366a (cruuud)
 
 $allmusicrand=chansonrand();
 $allartiste=allartiste();
@@ -45,7 +58,11 @@ if (isset($_GET['next'])) {
             <img src="" alt="Logo" class="logo">
             <div class="icon-container">
                 <div class="icon-house">
+<<<<<<< HEAD
                     <a href="/projetweb/pages/tunify_avec_connexion/avec_connexion.php"><i class="fa-solid fa-house" style="color: grey;font-size:20px;"></i></a>
+=======
+                    <a href="http://localhost/islem/projetweb/view/tunify_avec_connexion/avec_connexion.php"><i class="fa-solid fa-house" style="color: grey;font-size:20px;"></i></a>
+>>>>>>> 628366a (cruuud)
                 </div>
                 <span class="tooltip">Accueil</span>
             </div>
@@ -67,7 +84,38 @@ if (isset($_GET['next'])) {
             <a href="#" class="mot">Premium</a>
             <span class="divider">|</span>
             <a href="#" class="mot">S'inscrire</a>
+<<<<<<< HEAD
             <button class="connect-button">Se connecter</button>
+=======
+            
+            <style>
+            .notification-icon {
+                position: relative;
+                display: inline-block;
+            }
+
+            .notification-count {
+                position: absolute;
+                top: -19px;
+                right: -8px;
+                background-color: red;
+                color: white;
+                font-size: 12px;
+                padding: 2px 6px;
+                border-radius: 50%;
+                font-weight: bold;
+            }
+            </style>
+
+            <a href="historiquepaiment.php" class="notification-icon">
+                <i class="fa-solid fa-circle-user fa-xl" style="font-size:30px;"></i>
+                <?php if ($unreadCount > 0): ?>
+                    <span class="notification-count"><?= $unreadCount ?></span>
+                <?php endif; ?>
+            </a>
+         
+
+>>>>>>> 628366a (cruuud)
         </div>
     </nav>
     <div class="main-content">

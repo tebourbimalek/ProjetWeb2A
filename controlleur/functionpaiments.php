@@ -1,5 +1,8 @@
 <?php 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 628366a (cruuud)
 include_once 'C:\xampp\htdocs\islem\projetweb\model\config.php';
 
 function affichagePaiement() {
@@ -169,6 +172,7 @@ function updateTransaction($pdo, $song_id, $date_paiement, $abonnement) {
     return $stmt->execute();
 }
 
+<<<<<<< HEAD
 
 function getPaimentById($id) {
     try {
@@ -204,8 +208,80 @@ function getPaimentById($id) {
         
         return $paiment;
     } catch (PDOException $e) {
+=======
+function getPaiementById($id) {
+    try {
+        $pdo = config::getConnexion();
+        $stmt = $pdo->prepare("
+            SELECT t.*, u.nom_utilisateur AS client_name 
+            FROM transactions t
+            JOIN utilisateurs u ON t.user_id = u.artiste_id
+            WHERE t.ID = :id
+        ");
+        $stmt->execute([':id' => $id]);
+        $paiement = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$paiement) {
+            // Log if no data is found
+            error_log("Aucun paiement trouvé pour l'ID : " . $id);
+            return false;
+        }
+
+        // Switch based on abonnement
+        switch($paiement['Abonnement']) {
+            case 'Mini':
+                $paiement['montant'] = 5.99;
+                break;
+            case 'Personnel':
+                $paiement['montant'] = 14.99;
+                break;
+            case 'Duo':
+                $paiement['montant'] = 16.99;
+                break;
+            case 'Familial':
+                $paiement['montant'] = 19.99;
+                break;
+            default:
+                $paiement['montant'] = 0;
+        }
+
+        return $paiement;
+    } catch (PDOException $e) {
+        // Log error if database access fails
+>>>>>>> 628366a (cruuud)
         error_log("Erreur lors de la récupération du paiement: " . $e->getMessage());
         return false;
     }
 }
 
+<<<<<<< HEAD
+=======
+
+
+
+function countUnreadNotifications(int $userId): int {
+    $conn = config::getConnexion();
+    $stmt = $conn->prepare("SELECT COUNT(*) FROM notifications WHERE user_id = ? AND est_lue = 0");
+    $stmt->execute([$userId]);
+    return (int)$stmt->fetchColumn();
+}
+
+function markNotificationsAsRead(int $userId): void {
+    $conn = config::getConnexion();
+    $stmt = $conn->prepare("UPDATE notifications SET est_lue = 1 WHERE user_id = ?");
+    $stmt->execute([$userId]);
+}
+
+
+function affichagenotication($userId) {
+    $conn = config::getConnexion();
+    $sql = "SELECT t.ID, t.Date, t.Abonnement, t.payment_method, n.est_lue
+            FROM transactions t
+            LEFT JOIN notifications n ON t.ID = n.id_trans AND n.user_id = ?
+            WHERE t.user_id = ?
+            ORDER BY t.Date DESC";
+    $stmt = $conn->prepare($sql);
+    $stmt->execute([$userId, $userId]);
+    return $stmt->fetchAll();
+}
+>>>>>>> 628366a (cruuud)

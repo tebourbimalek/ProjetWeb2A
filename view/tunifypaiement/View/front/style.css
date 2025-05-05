@@ -20,7 +20,11 @@ body {
 }
 
 .sidebar img {
+<<<<<<< HEAD
     width: 140px;
+=======
+    width: 100px;
+>>>>>>> 628366a (cruuud)
     height: auto;
     margin-right: 500px;
 }
@@ -299,4 +303,70 @@ button:hover {
     color: white;
     margin-right: 10px;
     font-size: 18px;
+<<<<<<< HEAD
+=======
+}
+.red-dot {
+    color: red;
+    font-size: 14px;
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+  /* notifications.css */
+.notification-icon {
+    position: relative;
+    cursor: pointer;
+    margin-right: 20px;
+    font-size: 1.5rem;
+    color: #fff;
+}
+
+.notification-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: red;
+    color: white;
+    border-radius: 50%;
+    padding: 2px 6px;
+    font-size: 0.7rem;
+}
+
+.notification-dropdown {
+    position: absolute;
+    right: 0;
+    top: 50px;
+    background: white;
+    width: 300px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    display: none;
+    z-index: 1000;
+}
+
+.notification-item {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.notification-item.unread {
+    background: #f8f9fa;
+}
+
+.notification-message {
+    font-size: 0.9rem;
+}
+
+.notification-time {
+    font-size: 0.7rem;
+    color: #666;
+}
+
+.mark-all-read {
+    text-align: center;
+    padding: 10px;
+    background: #f1f1f1;
+    cursor: pointer;
+>>>>>>> 628366a (cruuud)
 }

@@ -34,4 +34,8 @@ if (isset($_GET['song_id']) && isset($_GET['type'])) {
     header("Location: backoffice.php?error=true");
     exit;
 }
+<<<<<<< HEAD
 ?>
+=======
+?>
+>>>>>>> 628366a (cruuud)

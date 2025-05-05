@@ -73,6 +73,7 @@ function playSong(path, title, artist, cover = null, button) {
     
 }
 
+<<<<<<< HEAD
 const prevButton = document.getElementById('prev');
 
 // Handle 'prev' click to replay the same song from the beginning
@@ -89,6 +90,8 @@ prevButton.addEventListener('click', () => {
         console.log("No current song to replay.");
     }
 });
+=======
+>>>>>>> 628366a (cruuud)
 
 
 
@@ -97,11 +100,14 @@ prevButton.addEventListener('click', () => {
 
 
 
+<<<<<<< HEAD
 document.getElementById('next').addEventListener('click', function () {
     document.getElementById('hiddenFrame').src = 'avec_connexion.php?next=1';
 });
 
 
+=======
+>>>>>>> 628366a (cruuud)
 function updateSongInfo(title, artist, cover,path) {
     audio.src = path;
     audio.play();
@@ -112,6 +118,7 @@ function updateSongInfo(title, artist, cover,path) {
     currentSongPath=    path; // Update current song path
 }
 
+<<<<<<< HEAD
 document.getElementById('audioPlayer').addEventListener('ended', function () {
 
     // Load a new random song via iframe
@@ -339,3 +346,30 @@ function toggleMute() {
 
 // Initialize the toggleMute function
 toggleMute();
+=======
+
+document.getElementById('search-input').addEventListener('keyup', function () {
+    const query = this.value.trim().toLowerCase();
+    const rows = document.querySelectorAll('#transactions-table tbody tr');
+
+    rows.forEach(row => {
+        let textFound = false;
+        row.querySelectorAll('td').forEach(cell => {
+            const text = cell.textContent;
+            const lowerText = text.toLowerCase();
+
+            // Nettoyage du contenu (évite double highlighting)
+            cell.innerHTML = text;
+
+            if (query && lowerText.includes(query)) {
+                const regex = new RegExp(`(${query})`, 'gi');
+                cell.innerHTML = text.replace(regex, `<span class="highlight">$1</span>`);
+                textFound = true;
+            }
+        });
+
+        row.style.display = textFound || !query ? '' : 'none';
+    });
+});
+
+>>>>>>> 628366a (cruuud)

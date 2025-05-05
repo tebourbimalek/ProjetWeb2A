@@ -3,7 +3,11 @@
 
 
 
+<<<<<<< HEAD
 require_once 'C:\xampp\htdocs\islem\projetweb\includes\config.php';
+=======
+require_once 'C:\xampp\htdocs\islem\projetweb\model\config.php';
+>>>>>>> 628366a (cruuud)
 
 
 

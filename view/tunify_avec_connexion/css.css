@@ -871,3 +871,119 @@ img:not([src]) {
   margin-top: 10px;
   border: 1px solid #ccc;
 }
+<<<<<<< HEAD
+=======
+
+
+/* Section Style */
+.payment-section {
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Header Section */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.section-title {
+  font-size: 1.5em;
+  font-weight: bold;
+  color: #333;
+}
+
+.search-box {
+  padding: 8px;
+  font-size: 1em;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  width: 250px;
+}
+
+/* Table Style */
+.payment-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.payment-table th, .payment-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.payment-table th {
+  background-color: #007BFF;
+  color: white;
+  font-size: 1.1em;
+}
+
+.payment-table td {
+
+  color:white;
+}
+
+/* Searchable Content Highlight */
+.searchable {
+  font-weight: normal;
+}
+
+/* Button Style */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 5px;
+  font-size: 1em;
+  cursor: pointer;
+  text-decoration: none;
+  color: white;
+  margin-right: 8px;
+}
+
+.btn-info {
+  background-color: #17a2b8;
+}
+
+.btn-info:hover {
+  background-color: #138496;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+}
+
+.btn-secondary:hover {
+  background-color: #5a6268;
+}
+
+.btn-danger {
+  background-color: #dc3545;
+}
+
+.btn-danger:hover {
+  background-color: #c82333;
+}
+
+/* Hidden Input */
+.hidden-input {
+  display: none;
+}
+
+/* Icon Style */
+.fas {
+  margin-right: 5px;
+}
+.highlight {
+  background-color: yellow;
+  color: black;
+  font-weight: bold;
+  padding: 1px 3px;
+  border-radius: 3px;
+}
+>>>>>>> 628366a (cruuud)

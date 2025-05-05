@@ -6,12 +6,18 @@
     <title>Dashboard - Tunify</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link rel="stylesheet" href="style.css">
+<<<<<<< HEAD
+=======
+    <link rel="stylesheet" href="notifications.css">
+
+>>>>>>> 628366a (cruuud)
 </head>
 <body>
     <!-- Sidebar -->
     <div class="sidebar">
         <img src="image/logo1.png" alt="logo">
         <a href="dashboard.html"><i class="fas fa-chart-line"></i><span>Dashboard</span></a>
+<<<<<<< HEAD
 
     </div>
     <div class="user-profile">
@@ -21,6 +27,30 @@
         
     </div>
     
+=======
+       <!-- Dans dashboard.html, près du user-profile -->
+       <div class="notification-icon" onclick="toggleNotifMenu()">
+        <i class="fas fa-bell"></i>
+        <span class="notification-badge">0</span>
+    </div>
+    
+    <div class="notification-dropdown" id="notif-list" style="display: none;">
+        <div class="notification-header">
+            <h4>Notifications</h4>
+            <button onclick="markAllAsRead()">Tout marquer comme lu</button>
+        </div>
+        <div class="notification-items" id="notification-container">
+            <!-- Les notifications seront chargées ici dynamiquement -->
+        </div>
+        <a href="notifications.html" class="view-all">Voir toutes les notifications</a>
+    </div>
+        
+        
+          
+    </div>
+  
+      
+>>>>>>> 628366a (cruuud)
     <!-- Bannière promotionnelle -->
     <div class="promo-banner">
         <div class="promo-text">
@@ -35,7 +65,11 @@
     </div>
     
     <!-- Main Content -->
+<<<<<<< HEAD
     <<div class="main-content">
+=======
+    <div class="main-content">
+>>>>>>> 628366a (cruuud)
         <h1>Vivez la différence</h1>
         <p><strong>Passez à Premium et bénéficiez d'un contrôle total sur votre musique. Annulez à tout moment.</strong></p>
     
@@ -142,5 +176,24 @@
             <p>&copy; 2025 Tunify | Tous droits réservés</p>
         </div>
     </footer>
+<<<<<<< HEAD
 </body>
+=======
+    <script src="view/frontoffice/notification.js"></script>
+<script>
+function toggleNotifMenu() {
+    let list = document.getElementById('notif-list');
+    list.style.display = (list.style.display === 'none') ? 'block' : 'none';
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    loadNotifications();
+    loadUnreadCount();
+});
+</script>
+
+</body>
+
+
+>>>>>>> 628366a (cruuud)
 </html>

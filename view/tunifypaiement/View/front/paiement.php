@@ -52,10 +52,17 @@
                     <div id="card-number-error" style="color: red; display: none;"></div>
                     
                     <div class="form-group">
+<<<<<<< HEAD
                         <label for="expiry-date">Date d'expiration (MM/AA):</label>
                         <input type="text" id="expiry-date" name="expiry-date" placeholder="MM/AA" maxlength="5">
                         <div id="expiry-date-error" style="color: red; display: none;"></div>
                     </div>
+=======
+                    <label for="expiry-date">Date d'expiration (JJ/MM/AAAA):</label>
+                    <input type="text" id="expiry-date" name="expiry-date" placeholder="JJ MM AAAA" maxlength="10">
+                    <div id="expiry-date-error" style="color: red; display: none;"></div>
+                                  </div>
+>>>>>>> 628366a (cruuud)
                     
                     <div class="form-group">
                         <label for="security-code">Code de sécurité (CVC):</label>

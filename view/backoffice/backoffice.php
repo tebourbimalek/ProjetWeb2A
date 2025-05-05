@@ -473,6 +473,10 @@ tr[style*="display: none"] {
                     <th>Numéro de carte</th>
                     <th>Date d'expiration</th>
                     <th>ID de transaction</th>
+<<<<<<< HEAD
+=======
+                    
+>>>>>>> 628366a (cruuud)
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -1040,4 +1044,8 @@ tr[style*="display: none"] {
     <script src="backpaiement.js"></script>
 
 </body>
+<<<<<<< HEAD
 </html>
+=======
+</html>
+>>>>>>> 628366a (cruuud)
