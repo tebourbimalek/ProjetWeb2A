@@ -1,3 +1,26 @@
+document.addEventListener("click", function(event) {
+    const shareBox2 = document.getElementById("shareBox2");
+    const shareButton2 = document.getElementById("shareButton2");
+
+    // If the click is NOT inside the shareBox2 and not on the button
+    if (!shareBox2.contains(event.target) && !shareButton2.contains(event.target)) {
+        shareBox2.style.display = "none";
+    }
+});
+
+
+window.addEventListener('load', function() {
+    setTimeout(function() {
+      const preloader = document.getElementById('preloader');
+      preloader.style.opacity = '0'; // Start fade out
+
+      setTimeout(function() {
+        preloader.style.display = 'none';
+        document.getElementById('main-content').style.display = 'block';
+      }, 500); // Match transition duration
+    }, 1500); // Show preloader for 1.5 seconds minimum
+  });
+
 // Toggle between main box and expanded views
 function toggleBox(event) {
     event.preventDefault();
@@ -42,7 +65,6 @@ let songHistory = [];
 // Function to play or toggle a song
 function playSong(path, title, artist, cover = null, button,songId) {
     isFromPlaylist = false;
-    console.log("Song ID:", songId); // Log the song ID
     const fullPath = new URL(path, window.location.href).href;
     if (audio.src === fullPath) {
         if (audio.paused) {
@@ -73,11 +95,19 @@ function playSong(path, title, artist, cover = null, button,songId) {
         song_id_box8ne.value = songId; // Set the song ID for the box8ne
         song_idd.value = songId; // Set the song ID for the box8ne
        
-        var xhr = new XMLHttpRequest();
-        xhr.open('POST', 'avec_connexion.php', true); // Replace with your actual PHP file name
-        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-        xhr.send('song_idd=' + encodeURIComponent(song_idd));
-    
+        const songIdValue = encodeURIComponent(song_idd.value);
+
+        // First request to avec_connexion.php
+        const xhr1 = new XMLHttpRequest();
+        xhr1.open('POST', '/projetweb/View/tunify_avec_connexion/avec_connexion.php', true);
+        xhr1.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr1.send('song_idd=' + songIdValue);
+
+        // Second request to log_song.php (or any second endpoint)
+        const xhr2 = new XMLHttpRequest();
+        xhr2.open('POST', '/projetweb/View/tunify_avec_connexion/music/realtime_data.php', true);
+        xhr2.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr2.send('song_idd=' + songIdValue);
     
         if (cover) {
             coverEl.src = cover;
@@ -651,10 +681,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
 // Unified function to load playlist and send playlist ID
 function handlePlaylistRequest(playlistId, isLoad = true) {
-    // Determine the request method based on whether we want to load playlist or send playlist ID
     const url = 'avec_connexion.php';
-    const bodyData = new URLSearchParams({ playlist_id: playlistId }); // Common body data for POST requests
-    
+    const bodyData = new URLSearchParams({ playlist_id: playlistId });
+
     fetch(url, {
         method: 'POST',
         headers: {
@@ -662,41 +691,34 @@ function handlePlaylistRequest(playlistId, isLoad = true) {
         },
         body: bodyData
     })
-    .then(response => response.json()) // Assuming the PHP returns JSON for both use cases
+    .then(response => response.json())
     .then(data => {
-        // Handling playlist loading case (if isLoad is true)
-        if (isLoad) {
-            if (data.playlist && data.recommendations) {
-                // Inject the playlist songs HTML into the 'playlist_song' div
-                const playlistDiv = document.getElementById('playlist_song');
-                playlistDiv.innerHTML = data.playlist;
-                playlistDiv.style.display = 'block'; // Make sure the div is visible
+        const playlistDiv = document.getElementById('playlist_song');
+        const recomandedDiv = document.getElementById('recomanded_song');
 
-                // Inject the recommended songs HTML into the 'recomanded_song' div
-                const recomandedDiv = document.getElementById('recomanded_song');
-                recomandedDiv.innerHTML = data.recommendations;
-                recomandedDiv.style.display = 'block'; // Ensure the div is visible
-            }
-        } 
-        // Handling the case for sending playlist ID to PHP
-        else {
+
+
+        if (isLoad) {
+            // ✅ Always update content, even if it's empty
+            playlistDiv.innerHTML = data.playlist || "<p style='color:white;'></p>";
+            playlistDiv.style.display = 'block';
+
+            recomandedDiv.innerHTML = data.recommendations || "<p style='color:white;'>No recommendations.</p>";
+            recomandedDiv.style.display = 'block';
+        } else {
             if (data && typeof data === 'string') {
-                console.log("Response from PHP:", data);
-                
-                // Insert the response (HTML content) into the 'playlist_song' div
-                const playlistDiv = document.getElementById('playlist_song');
                 playlistDiv.innerHTML = data;
-                playlistDiv.style.display = 'block';  // Make sure the div is visible
+                playlistDiv.style.display = 'block';
             } else {
                 alert("Error: Unexpected response format from PHP.");
             }
         }
     })
     .catch(error => {
-        console.error("Error handling playlist request:", error);
-        alert("There was an error processing the playlist request. Please try again later.");
+        console.error('Fetch error:', error);
     });
 }
+
 
 
 
@@ -727,7 +749,7 @@ function addSongToPlaylist(songId, playlistId) {
     console.log("Adding song with id:", songId, "to playlist with id:", playlistId);
 
     // Send the song and playlist IDs to the server using fetch
-    fetch('add_to_playlist.php', {
+    fetch('/projetweb/View/tunify_avec_connexion/music/add_to_playlist.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -765,10 +787,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 function delete_from_playlist(songId, playlistId) {
-    console.log("deleting song with id:", songId, "to playlist with id:", playlistId);
+    console.log("Deleting song with ID:", songId, "from playlist with ID:", playlistId);
 
-    // Send the song and playlist IDs to the server using fetch
-    fetch('delete_from_playlist.php', {
+    fetch('/projetweb/View/tunify_avec_connexion/music/delete_from_playlist.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -778,14 +799,38 @@ function delete_from_playlist(songId, playlistId) {
             playlist_id: playlistId
         })
     })
-    .then(response => response.text())  // Handle response from the server
+    .then(response => response.text())
     .then(data => {
         console.log("Server response:", data);
+        // You can optionally reload or update the UI here if needed
         location.reload();
-        
     })
     .catch(error => {
-        console.error("Error adding song to playlist:", error);
+        console.error("Error deleting song from playlist:", error);
+    });
+}
+
+function delete_from_liked_song(songId, user_id) {
+    console.log("Deleting song with ID:", songId, "for user with ID:", user_id);
+
+    fetch('/projetweb/View/tunify_avec_connexion/music/d_liked_song.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+            song_id: songId,
+            user_id: user_id
+        })
+    })
+    .then(response => response.text())
+    .then(data => {
+        console.log("Server response:", data);
+
+        location.reload();
+    })
+    .catch(error => {
+        console.error("Error deleting song from liked songs:", error);
     });
 }
 
@@ -822,27 +867,52 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
+// Create the offline message element
+const offlineMessage = document.createElement('div');
+offlineMessage.classList.add('offline-message');
+offlineMessage.style.display = 'none'; // Initially hidden
+offlineMessage.style.position = 'fixed';
+offlineMessage.style.top = '40%';
+offlineMessage.style.left = '50%';
+offlineMessage.style.transform = 'translate(-50%, -50%)';
+offlineMessage.style.backgroundColor = '#222';
+offlineMessage.style.color = '#fff';
+offlineMessage.style.padding = '20px';
+offlineMessage.style.borderRadius = '10px';
+offlineMessage.style.boxShadow = '0 0 10px rgba(0,0,0,0.5)';
+offlineMessage.innerHTML = `
+    <p style="margin-bottom: 10px;">Vous êtes hors ligne. Veuillez vérifier votre connexion internet.</p>
+    <button id="retryButton">Ressayer</button>
+`;
 
+document.body.appendChild(offlineMessage);
 
-let currentSong = null; // Store the current song row
-let currentAudio = document.getElementById("audioPlayer"); // Audio element to play the song
-let currentPlaybackPosition = 0; // Store the playback position of the current song
+// Retry button logic
+document.getElementById('retryButton').addEventListener('click', () => {
+    if (navigator.onLine) {
+        offlineMessage.style.display = 'none';
+    } else {
+        alert("Toujours hors ligne. Veuillez vérifier votre connexion.");
+    }
+});
+
+let currentSong = null;
+let currentAudio = document.getElementById("audioPlayer");
+let currentPlaybackPosition = 0;
 
 function playSongplaylist(row) {
     const songTitle = row.querySelector('.song-title');
     const songNumber = row.querySelector('.song-number');
     const playPauseButton = document.getElementById('playPause');
+    const songURL = row.getAttribute('data-song-url');
 
-    // Check if the clicked song is the same as the current one
     if (currentSong === row) {
         if (currentAudio.paused) {
-            // Resume song from current playback position
             currentAudio.currentTime = currentPlaybackPosition;
             currentAudio.play();
             updateSongState(songNumber, songTitle, playPauseButton, 'green');
             updatePlaybackControls(currentAudio);
         } else {
-            // Pause the song and store the current position
             currentPlaybackPosition = currentAudio.currentTime;
             currentAudio.pause();
             resetSongState(songNumber, songTitle, playPauseButton);
@@ -851,45 +921,75 @@ function playSongplaylist(row) {
         return;
     }
 
-    // If a song is currently playing, stop it and reset the previous song's state
     if (currentAudio.src) {
         currentAudio.pause();
-        resetSongState(currentSong.querySelector('.song-number'), currentSong.querySelector('.song-title'), playPauseButton);
+        if (currentSong) {
+            resetSongState(currentSong.querySelector('.song-number'), currentSong.querySelector('.song-title'), playPauseButton);
+        }
     }
 
-    // Get the URL for the clicked song and play it
-    const songURL = row.getAttribute('data-song-url');
-    currentAudio.src = songURL;
-    currentAudio.play();
+    // --- Play from online or fallback to cache if offline ---
+    if (navigator.onLine) {
+        offlineMessage.style.display = 'none';
+        currentAudio.src = songURL;
+        currentAudio.play();
+    } else {
+        caches.match(songURL).then(cachedResponse => {
+            if (cachedResponse) {
+                cachedResponse.blob().then(blob => {
+                    const offlineURL = URL.createObjectURL(blob);
+                    currentAudio.src = offlineURL;
+                    currentAudio.play();
+                });
+            } else {
+                offlineMessage.style.display = 'block';
+                return;
+            }
+        });
+    }
 
-    // Update the current song and change the song number to the pause icon
     currentSong = row;
     songNumber.innerHTML = '<i class="fa-solid fa-pause" style="font-size:13px; color:green;"></i>';
-
-    // Change the new song's title color to green
     updateSongState(songNumber, songTitle, playPauseButton, 'green');
-
-    // Update the playback controls and song details for the new song
     updatePlaybackControls(currentAudio);
     updateSongDetails(row);
 
-    // When the song ends, play the next song or loop to the first song if it's the last song
     currentAudio.onended = () => {
         const nextSong = getNextSong(row);
         if (nextSong) {
-            playSongplaylist(nextSong);
+            const nextTitle = nextSong.querySelector('.song-title')?.textContent;
+            const nextId = nextSong.getAttribute('data-song-id');
+            console.log(`Next song title: ${nextTitle}, ID: ${nextId}`);
         } else {
+            console.log("melowel")
             const firstSong = document.querySelector('.song-row');
-            playSongplaylist(firstSong);
+            const nowPlaying = playSongplaylist(firstSong);
+            console.log(`Now playing: ${nowPlaying}`);
+
         }
+        
+        
     };
+
+
+    const songId = row.getAttribute('data-song-id'); // Make sure your row has this attribute
+    if (songId) {
+        const xhr2 = new XMLHttpRequest();
+        xhr2.open('POST', '/projetweb/View/tunify_avec_connexion/music/realtime_data.php', true);
+        xhr2.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr2.send('song_idd=' + encodeURIComponent(songId));
+    }
+    
+    
+
 }
 
 // Helper function to update the song state (highlighting song title and number)
 function updateSongState(songNumber, songTitle, playPauseButton, color) {
-    songTitle.style.color = color;
-    songNumber.style.color = color;
-    playPauseButton.innerHTML = `<i class="fa-solid fa-pause" style="font-size:24px; color:white;"></i>`;
+    if(songTitle) songTitle.style.color = color;
+    if(songNumber) songNumber.style.color = color;
+    if(playPauseButton)playPauseButton.innerHTML = `<i class="fa-solid fa-pause" style="font-size:24px; color:white;"></i>`;
+    
 }
 
 // Helper function to reset the song state (reverting title, number, and button)
@@ -902,17 +1002,12 @@ function resetSongState(songNumber, songTitle, playPauseButton) {
 
 // Helper function to get the next song row
 function getNextSong(currentRow) {
-    const allSongs = document.querySelectorAll('.song-row');
-    let nextSong = null;
-
-    for (let i = 0; i < allSongs.length; i++) {
-        if (allSongs[i] === currentRow) {
-            nextSong = allSongs[i + 1] || allSongs[0]; // Go to next or loop to the first
-            break;
-        }
-    }
-    return nextSong;
+    const allSongs = Array.from(document.querySelectorAll('.song-row'));
+    const index = allSongs.indexOf(currentRow);
+    return index !== -1 && index < allSongs.length - 1 ? allSongs[index + 1] : null;
 }
+
+
 
 // Helper function to get the previous song row
 function getPrevSong(currentRow) {
@@ -980,8 +1075,12 @@ function updatePlaybackControls(song) {
 
     nextButton.onclick = function () {
         const nextSong = getNextSong(currentSong);
+        console.log("nextsong",nextSong);
         if (nextSong) {
             playSongplaylist(nextSong);
+        }else{
+            const firstSong = document.querySelectorAll('.song-row')[1];
+            playSongplaylist(firstSong);
         }
     };
 
@@ -1091,30 +1190,38 @@ let isFullscreen = false;
 // Function to update volume and icon
 function updateVolume(e) {
     const volumeBar = document.querySelector('.volume-bar');
-    const volumeWidth = volumeBar.offsetWidth;
-    const volume = Math.min(Math.max(0, e.clientX - volumeBar.offsetLeft), volumeWidth);
-    
-    const volumePercentage = volume / volumeWidth; // Volume as a percentage (0 to 1)
-    
-    // Set the volume of the audio
-    audioPlayer.volume = volumePercentage;  // Use 'audioPlayer' here instead of 'audio'
+    const rect = volumeBar.getBoundingClientRect(); // More accurate than offsetLeft
+    const volumeWidth = rect.width;
+    const offsetX = e.clientX - rect.left;
 
-    // Update the position of the dot and the volume bar fill
-    volumeDot.style.left = `${volumePercentage * volumeWidth - 7.5}px`; // Center dot on click
-    volumeCurrent.style.width = `${volumePercentage * 100}%`; // Set volume bar fill width
+    // Clamp between 0 and width
+    const volume = Math.min(Math.max(0, offsetX), volumeWidth);
+    const volumePercentage = volume / volumeWidth;
 
-    // Update the volume icon based on volume level
-    if (audioPlayer.volume === 0) {
-        volumeIcon.classList.remove('fa-volume-up', 'fa-volume-down');
-        volumeIcon.classList.add('fa-volume-mute');
-    } else if (audioPlayer.volume < 0.5) {
-        volumeIcon.classList.remove('fa-volume-up', 'fa-volume-mute');
-        volumeIcon.classList.add('fa-volume-down');
+    // Set the volume (make sure audioPlayer is defined and is a valid audio element)
+    if (!isNaN(volumePercentage) && isFinite(volumePercentage)) {
+        audioPlayer.volume = volumePercentage;
+
+        // Update UI
+        volumeDot.style.left = `${volumePercentage * volumeWidth - 7.5}px`;
+        volumeCurrent.style.width = `${volumePercentage * 100}%`;
+
+        // Update icon
+        if (volumePercentage === 0) {
+            volumeIcon.classList.remove('fa-volume-up', 'fa-volume-down');
+            volumeIcon.classList.add('fa-volume-mute');
+        } else if (volumePercentage < 0.5) {
+            volumeIcon.classList.remove('fa-volume-up', 'fa-volume-mute');
+            volumeIcon.classList.add('fa-volume-down');
+        } else {
+            volumeIcon.classList.remove('fa-volume-down', 'fa-volume-mute');
+            volumeIcon.classList.add('fa-volume-up');
+        }
     } else {
-        volumeIcon.classList.remove('fa-volume-down', 'fa-volume-mute');
-        volumeIcon.classList.add('fa-volume-up');
+        console.warn("Invalid volume value:", volumePercentage);
     }
 }
+
 
 // Add event listener to make the volume dot draggable
 volumeDot.addEventListener('mousedown', (e) => {
@@ -1263,7 +1370,6 @@ console.log("Script loaded");
 
 window.addEventListener('DOMContentLoaded', () => {
     const downloadButton = document.querySelector('.download-button');
-    console.log(downloadButton); // This should log the button
 
     if (!downloadButton) return; // Safeguard if button not found
 
@@ -1340,101 +1446,840 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     });
 });
+
+
+function playSongsearsh(path, title, artist, cover = null,songId) {
+    isFromPlaylist = false;
+    const fullPath = new URL(path, window.location.href).href;
+    if (audio.src === fullPath) {
+        if (audio.paused) {
+            audio.play();
+            playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+            starticon.style.display = 'inline-block';
+        } else {
+            audio.pause();
+            playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+        }
+    } else {
+        currentSongPath= path; // Update current song path
+    
+        audio.src = fullPath;
+        audio.play();
+    
+        // Update UI
+        playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+        starticon.style.display = 'inline-block';
+    
+        titleEl.textContent = title;
+        artistEl.textContent = artist;
+        icons.style.display = 'block'; // Hide the icon when a song is playing
+       
+        song_id_box8ne.value = songId; // Set the song ID for the box8ne
+        song_idd.value = songId; // Set the song ID for the box8ne
+       
+        const songIdElement = document.getElementById('song_idd'); // Ensure your input has id="song_idd"
+        if (songIdElement && songIdElement.value) {
+            const songIdValue = encodeURIComponent(songIdElement.value);
+
+            const xhr2 = new XMLHttpRequest();
+            xhr2.open('POST', '/projetweb/View/tunify_avec_connexion/music/realtime_data.php', true);
+            xhr2.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr2.send('song_idd=' + songIdValue);
+        }
+
+    
+    
+        if (cover) {
+            coverEl.src = cover;
+            coverEl.style.display = 'block';
+        }
+
+        updateLikeIcon(songId);
+    }
+   
+    
+}
 const searchInput = document.getElementById('global_search');
 const searchBtn = document.getElementById('searchBtn');
 const mainDiv = document.getElementById('box2-main');
 const mainDiv2 = document.getElementById('box2-expanded3');
 const resultsDiv = document.getElementById('resultsDiv');
 const playlist_div = document.getElementById('playlist_div');
+const photo_upload = document.querySelectorAll('.photo-upload');
+const button_artiste = document.getElementById('button_artiste');
 
+// Function to clean and normalize file paths
+function cleanPath(path) {
+    return path
+        .replace(/\\/g, '/')              // backslashes → forward slashes
+        .replace(/^C:/, '')               // remove leading "C:"
+        .replace(/^\/xampp\/htdocs/, ''); // remove leading "/xampp/htdocs"
+}
+
+// Perform search and display results
 function performSearch() {
     const query = searchInput.value.trim();
-    
+
     if (query !== "") {
         // Hide main divs and show results div
         mainDiv.style.display = 'none';
-        playlist_div.style.display ='none';
+        playlist_div.style.display = 'none';
         resultsDiv.style.display = 'block';
         mainDiv2.style.display = 'block';
-        fetch(`search_handler.php?query=${encodeURIComponent(query)}`)
-        .then(response => response.json())
-        .then(data => {
-            resultsDiv.innerHTML = ''; // Clear previous results
 
-            // Display utilisateur results
-            if (data.utilisateur && data.utilisateur.length > 0) {
-                const utilisateurSection = document.createElement('div');
-                utilisateurSection.innerHTML = `
-                    <h3 style="color: white;">Meilleur résultat</h3>
-                    <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 20px;">
-                        <img src="path/to/default-user-image.jpg" alt="User Image" style="width: 100px; height: 100px; border-radius: 50%;">
+        fetch(`search_handler.php?query=${encodeURIComponent(query)}`)
+            .then(res => res.json())
+            .then(data => {
+                resultsDiv.innerHTML = "";
+
+                const sectionsWrapper = document.createElement('div');
+                sectionsWrapper.style.cssText = `
+                    display: flex;
+                    gap: 20px;
+                    flex-wrap: wrap;
+                    align-items: stretch;
+                    margin-top: 20px;
+                `;
+
+                // === UTILISATEUR OR FIRST SONG ===
+                if (data.utilisateurs?.length) {
+                    const u = data.utilisateurs[0];
+                    const imgUrl = cleanPath(u.image_path);
+
+                    const utilisateurSection = document.createElement('div');
+                    utilisateurSection.style.cssText = `
+                        flex: 1 1 300px;
+                        background: #333;
+                        padding: 10px;
+                        border-radius: 10px;
+                        display: flex;
+                        flex-direction: column;
+                    `;
+
+                    const utilisateurCard = document.createElement('div');
+                    utilisateurCard.style.cssText = `
+                        flex:1;
+                        display:flex;
+                        align-items:center;
+                        gap:20px;
+                        cursor:pointer;
+                    `;
+
+                    utilisateurCard.innerHTML = `
+                        <img src="${imgUrl}" alt="User" style="width:100px;height:100px;border-radius:50%;">
                         <div>
-                            <p style="color: white; font-size: 20px; margin: 0;">${data.utilisateur[0].nom_utilisateur}</p>
-                            <p style="color: gray; margin: 0;">Artiste</p>
+                            <p style="color:white;font-size:20px;margin:0">${u.nom_utilisateur}</p>
+                            <p style="color:gray;margin:0;">Artiste</p>
                         </div>
-                        <button style="background-color: green; color: white; border: none; border-radius: 50%; width: 50px; height: 50px; cursor: pointer;">
+                        <button style="
+                            margin-left:auto;
+                            background:green;
+                            color:black;
+                            border:none;
+                            border-radius:50%;
+                            width:50px;
+                            height:50px;
+                            cursor:pointer;">
                             <i class="fa-solid fa-play"></i>
                         </button>
-                    </div>
-                `;
-                resultsDiv.appendChild(utilisateurSection);
-            }
+                    `;
 
-            // Display chanson results
-            if (data.chanson && data.chanson.length > 0) {
-                const chansonSection = document.createElement('div');
-                chansonSection.innerHTML = `<h3 style="color: white;">Titres</h3>`;
-                data.chanson.forEach(song => {
-                    chansonSection.innerHTML += `
-                        <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 10px;">
-                            <img src="path/to/default-song-image.jpg" alt="Song Image" style="width: 50px; height: 50px; border-radius: 5px;">
-                            <div>
-                                <p style="color: white; margin: 0;">${song.titre || 'Titre inconnu'}</p>
-                                <p style="color: gray; margin: 0;">${song.artiste || 'Artiste inconnu'}</p>
+                    utilisateurCard.addEventListener('click', () => {
+                        toggleBox3(u.artiste_id, u.nom_utilisateur, imgUrl);
+                    });
+
+                    const titre = document.createElement('h3');
+                    titre.textContent = 'Meilleur résultat';
+                    titre.style.cssText = 'color:white;margin-bottom:10px;';
+
+                    utilisateurSection.appendChild(titre);
+                    utilisateurSection.appendChild(utilisateurCard);
+
+                    sectionsWrapper.appendChild(utilisateurSection);
+                    }else if (data.chanson?.length) {
+                        const song = data.chanson[0];
+                        const cover = cleanPath(song.image_path);  // Path for the song cover
+                        const path = cleanPath(song.music_path);  // Assuming there's an audio path
+                        const title = song.song_title;
+                        const artist = song.album_name;  // Default to 'Unknown Artist' if no artist available
+                        const songId = song.id;  // Get the song's unique ID
+
+                        console.log(song);
+                        console.log(cover,path,title,artist,songId);
+                        
+                        const songSection = document.createElement('div');
+                        songSection.style.cssText = `
+                            flex: 1 1 300px;
+                            background: #333;
+                            padding: 10px;
+                            border-radius: 10px;
+                            display: flex;
+                            flex-direction: column;
+                        `;
+                    
+                        songSection.innerHTML = `
+                            <h3 style="color:white;margin-bottom:10px;">Chanson du moment</h3>
+                            <div style="flex:1; display:flex; align-items:center; gap:20px;">
+                                <img src="${cover}" alt="Song" style="width:100px;height:100px;border-radius:10px;">
+                                <div>
+                                    <p style="color:white;font-size:20px;margin:0">${title}</p>
+                                    <p style="color:gray;margin:0">${song.album_name}</p>
+                                </div>
+                                <button style="
+                                    margin-left:auto;
+                                    background:green;
+                                    color:white;
+                                    border:none;
+                                    border-radius:50%;
+                                    width:50px;
+                                    height:50px;
+                                    cursor:pointer;">
+                                    <i class="fa-solid fa-play"></i>
+                                </button>
                             </div>
-                            <p style="color: gray; margin-left: auto;">${song.duree || '0:00'}</p>
-                        </div>
+                        `;
+                    
+                        // Add event listener to the songSection
+                        songSection.addEventListener('click', () => {
+                            playSongsearsh(path,title,artist,cover,songId);
+                        });
+                        // Append the songSection to the wrapper
+                        sectionsWrapper.appendChild(songSection);
+                    }
+                    
+
+                // === SONG LIST SECTION ===
+                if (data.chanson?.length) {
+                    const chansonSection = document.createElement('div');
+                    chansonSection.style.cssText = `
+                        flex: 2 1 500px;
+                        background: #222;
+                        padding: 10px;
+                        border-radius: 10px;
+                        display: flex;
+                        flex-direction: column;
                     `;
-                });
-                resultsDiv.appendChild(chansonSection);
-            }
-
-            // Display playlist results
-            if (data.playlist && data.playlist.length > 0) {
-                const playlistSection = document.createElement('div');
-                playlistSection.innerHTML = `<h3 style="color: white;">Playlists</h3>`;
-                data.playlist.forEach(playlist => {
-                    playlistSection.innerHTML += `
-                        <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 10px;">
-                            <img src="path/to/default-playlist-image.jpg" alt="Playlist Image" style="width: 50px; height: 50px; border-radius: 5px;">
-                            <p style="color: white; margin: 0;">${playlist.nom}</p>
-                        </div>
+                    chansonSection.innerHTML = `<h3 style="color:white;margin-bottom:10px;">Titres</h3>`;
+                
+                    const listContainer = document.createElement('div');
+                    listContainer.style.cssText = `
+                        flex: 1;
+                        display: flex;
+                        flex-direction: column;
+                        gap: 10px;
                     `;
-                });
-                resultsDiv.appendChild(playlistSection);
-            }
+                
+                    // Inject CSS for hover effect
+                    if (!document.getElementById('hover-play-style')) {
+                        const style = document.createElement('style');
+                        style.id = 'hover-play-style';
+                        style.innerHTML = `
+                            .song-item {
+                                position: relative;
+                                transition: background 0.3s;
+                            }
+                            .song-item:hover {
+                                background: #444;
+                            }
+                            .play-button {
+                                position: absolute;
+                                right: 15px;
+                                top: 50%;
+                                transform: translateY(-50%);
+                                display: none;
+                                background: green;
+                                color: white;
+                                border: none;
+                                border-radius: 50%;
+                                width: 35px;
+                                height: 35px;
+                                cursor: pointer;
+                                justify-content: center;
+                                align-items: center;
+                            }
+                            .song-item:hover .play-button {
+                                display: flex;
+                            }
+                        `;
+                        document.head.appendChild(style);
+                    }
+                
+                    data.chanson.slice(0, 4).forEach(song => {
+                        const cover = cleanPath(song.image_path);
+                        const item = document.createElement('div');
+                        item.className = 'song-item';
+                        item.style.cssText = `
+                            display:flex;
+                            align-items:center;
+                            justify-content: space-between;
+                            gap:20px;
+                            background: #333;
+                            padding: 8px;
+                            border-radius: 5px;
+                            position: relative;
+                        `;
+                        item.innerHTML = `
+                            <div style="display:flex; align-items:center; gap:15px;">
+                                <img src="${cover}" alt="Song" style="width:50px;height:50px;border-radius:5px;">
+                                <div>
+                                    <p style="color:white;margin:0">${song.song_title}</p>
+                                    <p style="color:gray;margin:0">${song.album_name}</p>
+                                </div>
+                            </div>
+                            <div style="color:gray;margin-right:50px;">${song.duree}</div>
+                            <button class="play-button">
+                                <i class="fa-solid fa-play"></i>
+                            </button>
+                        `;
+                
+                        // Add event listener to play song on click
+                        item.addEventListener('click', () => {
+                            const path = cleanPath(song.music_path);  // Assuming there's an audio path
+                            const title = song.song_title;
+                            const artist = song.artist_name;
+                            const songId = song.id;
+                            
+                            playSongsearsh(path, title, artist, cover, songId);
+                        });
+                
+                        listContainer.appendChild(item);
+                    });
+                
+                    chansonSection.appendChild(listContainer);
+                    sectionsWrapper.appendChild(chansonSection);
+                }                
 
+                // === PLAYLIST SECTION ===
+                if (data.playlist?.length) {
+                    const playlistSection = document.createElement('div');
+                    playlistSection.style.cssText = `
+                        flex: 2 1 500px;
+                        background: #222;
+                        padding: 10px;
+                        border-radius: 10px;
+                        display: flex;
+                        flex-direction: column;
+                    `;
+                    playlistSection.innerHTML = `<h2 style="color:white;margin-bottom:10px;">Playlists</h2>`;
+                
+                    const playlistContainer = document.createElement('div');
+                    playlistContainer.style.cssText = `
+                        flex: 1;
+                        display: flex;
+                        gap: 15px;
+                        flex-wrap: wrap;
+                    `;
+                
+                    data.playlist.slice(0, 4).forEach(pl => {
+                        const rawImg = cleanPath(pl.img || '')
+                            .replace(/^C:/, '')
+                            .replace(/\\/g, '/')
+                            .replace(/\/xampp\/htdocs/, '');
+                
+                        const hasImg = Boolean(rawImg);
+                
+                        const playlistItem = document.createElement('div');
+                        playlistItem.className = 'album-item';
+                        playlistItem.style.cssText = `
+                            background: #333;
+                            width: 200px;
+                            padding: 10px;
+                            border-radius: 10px;
+                            display: flex;
+                            flex-direction: column;
+                            cursor: pointer;
+                            position: relative;
+                        `;
+                
+                        let imgHtml;
+                        if (hasImg) {
+                            imgHtml = `<img src="${rawImg}" class="cover-img" alt="Playlist ${pl.nom}"
+                                        onerror="this.src='/assets/default-playlist.jpg'">`;
+                        } else {
+                            imgHtml = `
+                                <div style="background-color: rgb(62, 62, 62); width:200px; height: 240px; border-radius: 5px; display: flex; align-items: center; justify-content: center; margin-right: 10px;">
+                                    <i class="fa-solid fa-music fa-lg" style="color: white; font-size: 40px;"></i>
+                                </div>
+                            `;
+                        }
+                
+                        playlistItem.innerHTML = `
+                            ${imgHtml}
+                            <button class="playlist-play-button"><i class="fa-solid fa-play"></i></button>
+                            <div style="margin-top:10px;">
+                                <p style="color:white;">${pl.nom}</p>
+                            </div>
+                        `;
+                
+                        // Add click event for the entire item
+                        playlistItem.addEventListener('click', () => {
+                            toggleBox3(pl.id, pl.nom, rawImg);
+                        });
+                
+                        // Optional: Add event for just the play button
+                        const playBtn = playlistItem.querySelector('.playlist-play-button');
+                        playBtn.addEventListener('click', (e) => {
+                            e.stopPropagation(); // Prevent triggering main click
+                            playPlaylist(pl.id); // Replace with your actual play logic
+                        });
+                
+                        playlistContainer.appendChild(playlistItem);
+                    });
+                
+                    playlistSection.appendChild(playlistContainer);
+                    sectionsWrapper.appendChild(playlistSection);
+                }
+                
+                // Inject style once
+                if (!document.getElementById('hover-playlist-style')) {
+                    const style = document.createElement('style');
+                    style.id = 'hover-playlist-style';
+                    style.innerHTML = `
+                        .album-item {
+                            position: relative;
+                            transition: background 0.3s;
+                        }
+                        .album-item:hover {
+                            background: #444;
+                        }
+                        .playlist-play-button {
+                            position: absolute;
+                            top: 200px;
+                            right: 10px;
+                            display: none;
+                            background: green;
+                            color: black;
+                            border: none;
+                            border-radius: 50%;
+                            width: 50px;
+                            height: 50px;
+                            cursor: pointer;
+                            justify-content: center;
+                            align-items: center;
+                            font-size: 16px;
+                        }
+                        .album-item:hover .playlist-play-button {
+                            display: flex;
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+                                
+                if (data.utilisateurs_artiste?.length) {
+                    const utilisateurSection = document.createElement('div');
+                    utilisateurSection.style.cssText = `
+                        flex: 2 1 500px;
+                        background: #222;
+                        padding: 10px;
+                        border-radius: 10px;
+                        display: flex;
+                        flex-direction: column;
+                    `;
+                    utilisateurSection.innerHTML = `<h2 style="color:white;margin-bottom:10px;">Utilisateurs</h2>`;
+                
+                    const utilisateurContainer = document.createElement('div');
+                    utilisateurContainer.style.cssText = `
+                        flex: 1;
+                        display: flex;
+                        gap: 15px;
+                        flex-wrap: wrap;
+                    `;
+                
+                    data.utilisateurs_artiste.slice(0, 4).forEach(user => {
+                        const userImg = cleanPath(user.image_path || '');
+                
+                        const userItem = document.createElement('div');
+                        userItem.className = 'user-item';
+                        userItem.style.cssText = `
+                            background: #333;
+                            width: 200px;
+                            padding: 10px;
+                            border-radius: 10px;
+                            display: flex;
+                            flex-direction: column;
+                            cursor: pointer;
+                            align-items: center;
+                            position: relative;
+                        `;
+                
+                        userItem.innerHTML = `
+                            <img src="${userImg}" class="cover-img" alt="${user.nom_utilisateur}" 
+                                 onerror="this.src='/assets/default-user.jpg'" 
+                                 style="width:150px;height:150px;border-radius:50%;">
+                            <button class="user-play-button"><i class="fa-solid fa-play"></i></button>
+                            <div style="margin-top:10px;">
+                                <p style="color:white;text-align:center;">${user.nom_utilisateur}</p>
+                            </div>
+                        `;
+                
+                        // Click event for whole user item
+                        userItem.addEventListener('click', () => {
+                            toggleBox3(user.artiste_id, user.nom_utilisateur, userImg);
+                        });
+                
+                        // Optional: Separate click for play button
+                        const playBtn = userItem.querySelector('.user-play-button');
+                        playBtn.addEventListener('click', (e) => {
+                            e.stopPropagation(); // Prevent main click
+                            playUserTracks(user.artiste_id); // Replace with your actual play logic
+                        });
+                
+                        utilisateurContainer.appendChild(userItem);
+                    });
+                
+                    utilisateurSection.appendChild(utilisateurContainer);
+                    sectionsWrapper.appendChild(utilisateurSection);
+                }
+                
+                // Inject hover button style once
+                if (!document.getElementById('hover-user-style')) {
+                    const style = document.createElement('style');
+                    style.id = 'hover-user-style';
+                    style.innerHTML = `
+                        .user-item {
+                            position: relative;
+                            transition: background 0.3s;
+                        }
+                        .user-item:hover {
+                            background: #444;
+                        }
+                        .user-play-button {
+                            position: absolute;
+                            top: 210px;
+                            right: 12px;
+                            display: none;
+                            background: green;
+                            color: black;
+                            border: none;
+                            border-radius: 50%;
+                            width: 40px;
+                            height: 40px;
+                            cursor: pointer;
+                            justify-content: center;
+                            align-items: center;
+                            font-size: 16px;
+                        }
+                        .user-item:hover .user-play-button {
+                            display: flex;
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+                if (data.utilisateurs_user?.length) {
+                    const utilisateurSection = document.createElement('div');
+                    utilisateurSection.style.cssText = `
+                        flex: 2 1 500px;
+                        background: #222;
+                        padding: 10px;
+                        border-radius: 10px;
+                        display: flex;
+                        flex-direction: column;
+                    `;
+                    utilisateurSection.innerHTML = `<h2 style="color:white;margin-bottom:10px;">Users</h2>`;
+                
+                    const utilisateurContainer = document.createElement('div');
+                    utilisateurContainer.style.cssText = `
+                        flex: 1;
+                        display: flex;
+                        gap: 15px;
+                        flex-wrap: wrap;
+                    `;
+                
+                    data.utilisateurs_user.slice(0, 4).forEach(user => {
+                        const userImg = cleanPath(user.image_path);
+                        const hasImg = user.image_path && user.image_path.trim() !== '';
+                        const rawImg = cleanPath(user.image_path);
+                    
+                        const userItem = document.createElement('div');
+                        userItem.className = 'user-item';
+                        userItem.style.cssText = `
+                            background: #333;
+                            width: 200px;
+                            padding: 10px;
+                            border-radius: 10px;
+                            display: flex;
+                            flex-direction: column;
+                            cursor: pointer;
+                            align-items: center;
+                            position: relative;
+                        `;
+                    
+                        let imgHtml;
+                        if (hasImg) {
+                            imgHtml = `<img src="${rawImg}" class="cover-img" alt="User ${user.nom_utilisateur}"
+                                        onerror="this.src='/assets/default-user.jpg'" style="width:100%; height:240px; border-radius:5px;">`;
+                        } else {
+                            imgHtml = `
+                                <div style="background-color: rgb(62, 62, 62); width:200px; height: 240px; border-radius: 5px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fa-solid fa-user fa-lg" style="color: white; font-size: 40px;"></i>
+                                </div>
+                            `;
+                        }
+                    
+                        userItem.innerHTML = `
+                            ${imgHtml}
+                            <button class="user-play-button"><i class="fa-solid fa-play"></i></button>
+                            <div style="margin-top:10px;">
+                                <p style="color:white;text-align:center;">${user.nom_utilisateur}</p>
+                            </div>
+                        `;
+                    
+                        userItem.addEventListener('click', () => {
+                            toggleBox4(user.artiste_id, user.nom_utilisateur, userImg);
+                        });
+                    
+                        const playBtn = userItem.querySelector('.user-play-button');
+                        playBtn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            playUserTracks(user.artiste_id);
+                        });
+                    
+                        utilisateurContainer.appendChild(userItem);
+                    });
+                    
+                    utilisateurSection.appendChild(utilisateurContainer);
+                    sectionsWrapper.appendChild(utilisateurSection);
+                }
+                
+                // Inject hover button style once
+                if (!document.getElementById('hover-user-style')) {
+                    const style = document.createElement('style');
+                    style.id = 'hover-user-style';
+                    style.innerHTML = `
+                        .user-item {
+                            position: relative;
+                            transition: background 0.3s;
+                        }
+                        .user-item:hover {
+                            background: #444;
+                        }
+                        .user-play-button {
+                            position: absolute;
+                            top: 120px;
+                            right: 50px;
+                            display: none;
+                            background: green;
+                            color: black;
+                            border: none;
+                            border-radius: 50%;
+                            width: 40px;
+                            height: 40px;
+                            cursor: pointer;
+                            justify-content: center;
+                            align-items: center;
+                            font-size: 16px;
+                        }
+                        .user-item:hover .user-play-button {
+                            display: flex;
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+                
+                
 
-        })
+                // Append all sections
+                resultsDiv.appendChild(sectionsWrapper);
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+                resultsDiv.innerHTML = "<p style='color:red;'>Something went wrong. Please try again later.</p>";
+            });
     } else {
-        // If search input is empty, show the main divs
         mainDiv.style.display = 'block';
-        mainDiv2.style.display = 'block';
+        playlist_div.style.display = 'block';
         resultsDiv.style.display = 'none';
+        mainDiv2.style.display = 'none';
+        }
     }
+
+    // Trigger on typing
+    searchInput.addEventListener('input', performSearch);
+
+    // Trigger on click
+    searchBtn.addEventListener('click', performSearch);
+
+    // Trigger on Enter key press
+    searchInput.addEventListener('keydown', (e) => {
+        if (e.key === "Enter") {
+            performSearch();
+        }
+    });
+
+    function loadPlaylists(playlistId) {
+        fetch('/projetweb/View/tunify_avec_connexion/music/load_playlists.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'playlist_id=' + encodeURIComponent(playlistId)
+        })
+        .then(response => response.text())
+        .then(html => {
+            const playlistDiv = document.getElementById('playlistdiv');
+            const playlistDiv2 = document.getElementById('playlist_song');
+            const recomandedDiv = document.getElementById('recomanded_song');
+            const historique_song = document.getElementById('historique_song');
+
+            playlistDiv2 .style.display = 'none'
+            recomandedDiv .style.display = 'none'
+            historique_song.style.display = 'none'
+    
+            // Trim whitespace to accurately check if content is empty
+            if (html.trim() === '') {
+                playlistDiv.innerHTML = '';
+                playlistDiv.style.display = 'none'; // Hide the div if nothing to show
+            } else {
+                playlistDiv.innerHTML = html;
+                playlistDiv.style.display = 'block';
+            }
+        })
+        .catch(error => {
+            console.error('Erreur lors du chargement des playlists :', error);
+        });
+    }
+
+    
+    function loadhistoriquesongs(playlistId) {
+        fetch('/projetweb/View/tunify_avec_connexion/music/historiquesongs.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'playlist_id=' + encodeURIComponent(playlistId)
+        })
+        .then(response => response.text())
+        .then(html => {
+            const playlistDiv = document.getElementById('playlistdiv');
+            const playlistDiv2 = document.getElementById('playlist_song');
+            const recomandedDiv = document.getElementById('recomanded_song');
+            const historique_song = document.getElementById('historique_song');
+
+            playlistDiv2 .style.display = 'none'
+            recomandedDiv .style.display = 'none'
+    
+            // Trim whitespace to accurately check if content is empty
+            if (html.trim() === '') {
+                historique_song.innerHTML = '';
+                historique_song.style.display = 'none'; // Hide the div if nothing to show
+            } else {
+                historique_song.innerHTML = html;
+                historique_song.style.display = 'block'
+                
+            }
+        })
+        .catch(error => {
+            console.error('Erreur lors du chargement des playlists :', error);
+        });
+    }
+    function loadhistoriquesongslogs(playlistId) {
+        fetch('music/log_songs.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'playlist_id=' + encodeURIComponent(playlistId)
+        })
+        .then(response => response.text())
+        .then(html => {
+            const playlistDiv = document.getElementById('playlistdiv');
+            const playlistDiv2 = document.getElementById('playlist_song');
+            const recomandedDiv = document.getElementById('recomanded_song');
+            const historique_song = document.getElementById('historique_song');
+            const log_song = document.getElementById('log_song');
+
+            playlistDiv2 .style.display = 'none'
+            recomandedDiv .style.display = 'none'
+    
+            // Trim whitespace to accurately check if content is empty
+            if (html.trim() === '') {
+                log_song.innerHTML = '';
+                log_song.style.display = 'none'; // Hide the div if nothing to show
+            } else {
+                log_song.innerHTML = html;
+                log_song.style.display = 'block'
+                
+            }
+        })
+        .catch(error => {
+            console.error('Erreur lors du chargement des playlists :', error);
+        });
+    }
+    function loadhistoriquesongs(playlistId) {
+        fetch('/projetweb/View/tunify_avec_connexion/music/historiquesongs.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'playlist_id=' + encodeURIComponent(playlistId)
+        })
+        .then(response => response.text())
+        .then(html => {
+            const playlistDiv = document.getElementById('playlistdiv');
+            const playlistDiv2 = document.getElementById('playlist_song');
+            const recomandedDiv = document.getElementById('recomanded_song');
+            const historique_song = document.getElementById('historique_song');
+
+            playlistDiv2 .style.display = 'none'
+            recomandedDiv .style.display = 'none'
+    
+            // Trim whitespace to accurately check if content is empty
+            if (html.trim() === '') {
+                historique_song.innerHTML = '';
+                historique_song.style.display = 'none'; // Hide the div if nothing to show
+            } else {
+                historique_song.innerHTML = html;
+                historique_song.style.display = 'block'
+                
+            }
+        })
+        .catch(error => {
+            console.error('Erreur lors du chargement des playlists :', error);
+        });
+    }
+
+    function news(playlistId) {
+    fetch('news/view_news.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'playlist_id=' + encodeURIComponent(playlistId)
+    })
+    .then(response => response.text())
+    .then(html => {
+        const playlistDiv = document.getElementById('playlistdiv');
+        const playlistDiv2 = document.getElementById('playlist_song');
+        const recomandedDiv = document.getElementById('recomanded_song');
+        const historique_song = document.getElementById('historique_song');
+        const log_song = document.getElementById('log_song');
+        const newsdiv = document.getElementById("news");
+        const box_liked_song = document.getElementById("box_liked_song");
+
+        playlistDiv2.style.display = 'none';
+        recomandedDiv.style.display = 'none';
+        box_liked_song.style.display = 'none';
+
+        // Trim whitespace to accurately check if content is empty
+        if (html.trim() === '') {
+            newsdiv.innerHTML = '';
+            newsdiv.style.display = 'none'; // Hide the div if nothing to show
+        } else {
+            newsdiv.innerHTML = html;
+            newsdiv.style.display = 'block';
+  
+    
+
+            // Dynamically load a JS file
+            loadJSFile('news/app.js');
+        }
+    })
+    .catch(error => {
+        console.error('Erreur lors du chargement des playlists :', error);
+    });
 }
 
-// Trigger on typing
-searchInput.addEventListener('input', () => {
-    performSearch();
-});
-
-// Trigger on click
-searchBtn.addEventListener('click', performSearch);
-
-// Trigger on Enter key press
-searchInput.addEventListener('keydown', (e) => {
-    if (e.key === "Enter") {
-        performSearch();
-    }
-});
+// Function to dynamically load a JS file
+function loadJSFile(filePath) {
+    const script = document.createElement('script');
+    script.src = filePath;
+    script.type = 'text/javascript';
+    script.onload = function() {
+        console.log(`Script loaded successfully: ${filePath}`);
+    };
+    script.onerror = function() {
+        console.error(`Failed to load script: ${filePath}`);
+    };
+    document.head.appendChild(script); // Append the script to the head of the document
+}
+    

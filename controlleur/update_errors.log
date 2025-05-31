@@ -1,0 +1,20 @@
+[11-May-2025 20:37:03 Europe/Berlin] PHP Warning:  require_once(C:\xampp\htdocs\projetweb\Model\includes\config.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\projetweb\controlleur\get_updates.php on line 12
+[11-May-2025 20:37:03 Europe/Berlin] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\projetweb\Model\includes\config.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\projetweb\controlleur\get_updates.php:12
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\projetweb\controlleur\get_updates.php on line 12
+[11-May-2025 20:38:11 Europe/Berlin] PHP Warning:  require_once(C:\xampp\htdocs\projetweb\Model\includes\config.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\projetweb\controlleur\get_updates.php on line 12
+[11-May-2025 20:38:11 Europe/Berlin] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\projetweb\Model\includes\config.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\projetweb\controlleur\get_updates.php:12
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\projetweb\controlleur\get_updates.php on line 12
+[11-May-2025 20:39:03 Europe/Berlin] PHP Warning:  require_once(C:\xampp\htdocs\projetweb\Model\includes\config.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\projetweb\controlleur\get_updates.php on line 12
+[11-May-2025 20:39:03 Europe/Berlin] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\projetweb\Model\includes\config.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\projetweb\controlleur\get_updates.php:12
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\projetweb\controlleur\get_updates.php on line 12
+[11-May-2025 20:44:30 Europe/Berlin] PHP Warning:  require_once(C:\xampp\htdocs\projetweb\Model\includes\config.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\projetweb\controlleur\get_updates.php on line 12
+[11-May-2025 20:44:30 Europe/Berlin] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\projetweb\Model\includes\config.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\projetweb\controlleur\get_updates.php:12
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\projetweb\controlleur\get_updates.php on line 12

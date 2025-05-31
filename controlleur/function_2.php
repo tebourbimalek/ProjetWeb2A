@@ -132,6 +132,23 @@ function getPlaylistById($playlistId) {
         throw new Exception("Erreur SQL : " . $e->getMessage());
     }
 }
+function getPlaylistuser($playlistId) {
+    try {
+        $pdo = config::getConnexion();
+
+        $sql = "SELECT * FROM playlist WHERE utilisateur_id = :id";
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindParam(':id', $playlistId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        $playlists = $stmt->fetchAll(PDO::FETCH_ASSOC); // <-- use fetchAll instead of fetch
+
+        return $playlists;
+
+    } catch (PDOException $e) {
+        throw new Exception("Erreur SQL : " . $e->getMessage());
+    }
+}
 
 function deletePlaylist($id) {
     try {
@@ -382,5 +399,183 @@ function deleteSongFromPlaylist($playlistId, $songId) {
     }
 }
 
+
+function deleteSongFromlikedsong($user_id, $songId) {
+    try {
+        $conn = config::getConnexion(); // PDO connection
+
+        // Prepare the SQL query safely
+        $stmt = $conn->prepare("DELETE FROM liked_song WHERE user_id = :user_id AND song_id = :song_id");
+        
+        // Execute with parameters
+        $stmt->execute([
+            ':user_id' => $user_id,
+            ':song_id' => $songId
+        ]);
+
+        // Check if a row was deleted
+        if ($stmt->rowCount() > 0) {
+            return true;
+        } else {
+            return false; // Nothing was deleted
+        }
+
+    } catch (PDOException $e) {
+        // Optional: log the error somewhere instead of echo
+        throw new Exception('Database error: ' . $e->getMessage());
+    }
+}
+
+function updateStreamStats($musicId, $pdo,$id_user) {
+    $statDate = date('Y-m-d');
+
+    try {
+        // Check if entry exists
+        $checkSql = "SELECT * FROM streaming_stats 
+                     WHERE music_id = :music_id AND stat_date = :stat_date AND id_user = :id_user";
+        $stmt = $pdo->prepare($checkSql);
+        $stmt->execute([
+            ':music_id' => $musicId,
+            ':stat_date' => $statDate,
+            ':id_user' => $id_user
+        ]);
+
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($row) {
+            // Update existing entry: increment stream_count by 1
+            $updateSql = "UPDATE streaming_stats 
+                          SET stream_count = stream_count + 1 
+                          WHERE music_id = :music_id AND stat_date = :stat_date AND id_user = :id_user";
+            $updateStmt = $pdo->prepare($updateSql);
+            $updateStmt->execute([
+                ':music_id' => $musicId,
+                ':stat_date' => $statDate,
+                ':id_user' => $id_user
+            ]);
+        } else {
+            // Insert new entry
+            $insertSql = "INSERT INTO streaming_stats (music_id, stat_date, stream_count, listener_count, id_user)
+                          VALUES (:music_id, :stat_date, 1, 1, :id_user)";
+            $insertStmt = $pdo->prepare($insertSql);
+            $insertStmt->execute([
+                ':music_id' => $musicId,
+                ':stat_date' => $statDate,
+                ':id_user' => $id_user
+            ]);
+        }
+
+    } catch (PDOException $e) {
+        echo "Database error: " . $e->getMessage();
+    }
+}
+
+
+function searchUtilisateursartiste($query) {
+    $pdo = config::getConnexion();
+    $stmt = $pdo->prepare("SELECT * FROM utilisateurs WHERE nom_utilisateur LIKE :query and type_utilisateur LIKE 'artiste'");
+    $stmt->execute(['query' => '%' . $query . '%']);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+function searchUtilisateursuser($query) {
+    $pdo = config::getConnexion();
+    $stmt = $pdo->prepare("SELECT * FROM utilisateurs WHERE nom_utilisateur LIKE :query and type_utilisateur LIKE 'user'");
+    $stmt->execute(['query' => '%' . $query . '%']);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+function searchChansons($query) {
+    $pdo = config::getConnexion();
+    $stmt = $pdo->prepare("SELECT * FROM chanson WHERE song_title LIKE :query");
+    $stmt->execute(['query' => '%' . $query . '%']);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+function searchPlaylists($query, $id_user) {
+    $pdo = config::getConnexion();
+    $stmt = $pdo->prepare("SELECT * FROM playlist WHERE nom LIKE :query AND utilisateur_id = :id_user");
+    $stmt->execute([
+        'query' => '%' . $query . '%',
+        'id_user' => $id_user
+    ]);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+
+
+function getSongsWithStatsSortedByUser($userId) {
+    $pdo = config::getConnexion();
+    try {
+        $sql = "
+            SELECT 
+                m.*, 
+                s.stream_count, 
+                s.listener_count, 
+                s.stat_date, 
+                s.id_user
+            FROM 
+                chanson m
+            JOIN 
+                streaming_stats s ON m.id = s.music_id
+            WHERE 
+                s.id_user = :userId
+            ORDER BY 
+                s.stream_count DESC, 
+                m.id ASC
+        ";
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        echo "Erreur lors de la récupération des chansons : " . $e->getMessage();
+        return [];
+    }
+}
+
+
+function getUserData($userId) {
+    $pdo = config::getConnexion();
+
+    try {
+        $stmt = $pdo->prepare("SELECT * FROM utilisateurs WHERE artiste_id = :id");
+        $stmt->execute([':id' => $userId]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        echo "Erreur lors de la récupération de l'utilisateur : " . $e->getMessage();
+        return null;
+    }
+}
+
+function getUserSongHistory($userId) {
+    $pdo = config::getConnexion();  // PDO connection from your config
+
+    try {
+        // SQL query to fetch song history for the user
+        $sql = "
+            SELECT c.*, s.stat_date, s.stream_count
+            FROM streaming_stats s
+            JOIN chanson c ON s.music_id = c.id
+            WHERE s.id_user = :user_id
+            ORDER BY s.stat_date DESC
+        ";
+        
+        // Prepare the SQL statement
+        $stmt = $pdo->prepare($sql);
+        
+        // Bind the user ID parameter
+        $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+        
+        // Execute the query
+        $stmt->execute();
+        
+        // Fetch all results as an associative array
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        // In case of error, print the error message
+        echo "Error fetching song history: " . $e->getMessage();
+        return [];
+    }
+}
 
 ?>

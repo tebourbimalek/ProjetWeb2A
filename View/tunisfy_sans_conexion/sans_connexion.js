@@ -18,21 +18,6 @@ document.getElementById('closeBtn').addEventListener('click', function() {
     // }, 2000);
 });
 
-// Animation for the logo
-const logo = document.querySelector('.logo');
-
-function pulseAnimation() {
-    logo.style.transform = 'scale(1.05)';
-    setTimeout(() => {
-        logo.style.transform = 'scale(1)';
-    }, 500);
-}
-
-// Set initial transition
-logo.style.transition = 'transform 0.5s ease-in-out';
-
-// Start animation cycle
-setInterval(pulseAnimation, 3000);
 
 
 // Function to show the modal with either album cover or static image

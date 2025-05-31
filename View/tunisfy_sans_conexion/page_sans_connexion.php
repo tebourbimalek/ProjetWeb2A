@@ -1,4 +1,5 @@
 <?php 
+require_once 'C:\xampp\htdocs\projetweb\controlleur\controlleruser.php'; 
 
 require_once 'display.php';
 
@@ -12,6 +13,8 @@ $artistes=artiste();
 $allmusic=allmusic();
 $allartiste=allartiste();
 
+redirectIfLoggedIn();
+
 ?>
 
 
@@ -22,6 +25,9 @@ $allartiste=allartiste();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tunify</title>
     <script src="https://kit.fontawesome.com/d4610e21c1.js" crossorigin="anonymous"></script>
+        
+    <link rel="icon" href="/projetweb/View/tunifypaiement/image/logo1.png" type="image/png">
+
     <link rel="stylesheet" href="style.css">
     
 </head>
@@ -33,12 +39,12 @@ $allartiste=allartiste();
             <img id="albumCover" src="" alt="" width="300px" height="300px">
             <div class="content-section">
                 <h1 style="color : white;">Testez notre service avec un compte Tunify Free.</h1>
-                <div class="buttons">
-                    <a href="#" class="btn btn-primary">S'inscrire gratuitement</a>
-                </div>
+                <form action="register.php" method="get">
+                     <button type="submit" class="btn btn-primary">S'inscrire gratuitement</button>
+               </form>
                 <div class="login-section">
                     <span>Vous avez déjà un compte ?</span>
-                    <a href="#" class="login-link">Se connecter</a>
+                    <a href="login.php" class="login-link">Se connecter</a>
                 </div>
             </div>
         </div>
@@ -46,10 +52,10 @@ $allartiste=allartiste();
     </div>
     <nav class="navbar">
         <div class="left-section">
-            <img src="" alt="Logo" class="logo">
+            <img src="/projetweb/View/tunifypaiement/image/logo1.png" alt="Logo" class="" width="150px" height="60px">
             <div class="icon-container">
                 <div class="icon-house">
-                    <a href="/projetweb/pages/tunisfy_sans_conexion/page_sans_connexion.php"><i class="fa-solid fa-house" style="color: grey;font-size:20px;"></i></a>
+                    <a href="/projetweb/View/tunisfy_sans_conexion/page_sans_connexion.php"><i class="fa-solid fa-house" style="color: grey;font-size:20px;"></i></a>
                 </div>
                 <span class="tooltip">Accueil</span>
             </div>
@@ -68,10 +74,8 @@ $allartiste=allartiste();
             </div>
         </div>
         <div class="right-section">
-            <a href="#" class="mot">Premium</a>
-            <span class="divider">|</span>
-            <a href="#" class="mot">S'inscrire</a>
-            <button class="connect-button">Se connecter</button>
+            <a href="register.php" class="mot">S'inscrire</a>
+            <a href="login.php" class="connect-button">Se connecter</a>
         </div>
     </nav>
     <div class="main-content">
@@ -88,7 +92,7 @@ $allartiste=allartiste();
             <div class="playlist-card">
                 <h1 class="title">Créez votre première playlist</h1>
                 <p class="subtitle">C'est simple, nous allons vous aider</p>
-                <button class="create-button">Créer une playlist</button>
+                <a href="login.php" class="create-button">Créer une playlist</a>
             </div>
             <div class="card1">
                 <div>
@@ -447,7 +451,7 @@ $allartiste=allartiste();
                   <div class="footer-title">Extrait sur Tunify</div>
                   <div class="footer-text">Inscrivez-vous pour écouter titres en illimité. Pas besoin de carte de crédit.</div>
                 </div>
-                <button class="login-button">S'inscrire gratuitement</button>
+                <a href="register.php" class="login-button">S'inscrire gratuitement</a>
               </div>
           </div>
         </div>

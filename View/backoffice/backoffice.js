@@ -25,6 +25,9 @@ function showToast(message) {
 }
 
 // Function to populate song tables
+window.onload = function () {
+    switchTab('dashboard');
+};
 
 
 // Function to handle tab switching
@@ -33,18 +36,33 @@ function switchTab(tabId) {
     tabContents.forEach(tab => {
         tab.classList.remove('active');
     });
-    
+
     // Remove active class from all tab links
     tabLinks.forEach(link => {
         link.classList.remove('active');
     });
-    
+
     // Show the selected tab
     document.getElementById(tabId).classList.add('active');
-    
+
     // Set the tab link as active
     document.querySelector(`.sidebar-menu li[data-tab="${tabId}"]`).classList.add('active');
+
+    console.log(tabId);
+
+    const headerTitle = document.getElementById('header-title');
+    const addquestion = document.getElementById('add-new-question-btn');
+    const back = document.getElementById('back-to-games-btn');
+
+    if (tabId === 'jeux') {
+        headerTitle.style.display = 'block';
+    } else {
+        headerTitle.style.display = 'none';
+        addquestion.style.display = 'none';
+        back.style.display = 'none';
+    }
 }
+
 
 // Function to open a modal
 function openModal(modal) {
@@ -389,7 +407,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const songId = document.getElementById('delete-song-id').value;
 
         // Redirect to the deletion script with the song ID
-        window.location.href = 'ajout.php?song_id=' + songId;
+       window.location.href = '/projetweb/View/backoffice/music/delete.php?song_id=' + songId;
     });
 });
 

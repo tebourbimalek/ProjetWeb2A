@@ -1,17 +1,35 @@
 <?php
 
 include_once 'C:\xampp\htdocs\projetweb\model\config.php';
-function affichage() {
+function affichage($user_id) {
     try {
         // Connexion à la base de données
         $pdo = config::getConnexion();
         
-        // Requête SQL
-        $sql = "SELECT id, image_path, song_title, album_name, release_date, duree FROM chanson";
-        $stmt = $pdo->query($sql);
+        // Requête SQL pour récupérer les chansons en fonction de l'user_id
+        $sql = "SELECT id, image_path, song_title, album_name, release_date, duree FROM chanson WHERE artiste_id = :user_id";
+        
+        // Préparer la requête avec les paramètres
+        $stmt = $pdo->prepare($sql);
+        
+        // Lier la variable $user_id à :user_id
+        $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+        
+        // Exécuter la requête
+        $stmt->execute();
         
         // Récupération des résultats
         $songs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Vérifier si des chansons ont été trouvées
+        if (count($songs) === 0) {
+            // Enregistrer l'information dans la session si aucune chanson n'est trouvée
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+            $_SESSION['error_message'] = 'Aucune chanson trouvée pour cet utilisateur.';
+            return [];
+        }
         
         // Retourner les chansons récupérées
         return $songs;
@@ -23,33 +41,52 @@ function affichage() {
         }
         
         // Enregistrer l'erreur dans la session
-        return []; // Retourner un tableau vide en cas d'erreur
+        $errorMessage = 'Erreur de base de données: ' . $e->getMessage();
+        $_SESSION['error_message'] = $errorMessage;
+        
+        // Log the error to a file for further investigation (optional)
+        error_log($errorMessage, 3, 'errors.log');
+        
+        // Retourner un tableau vide en cas d'erreur
+        return [];
     }
 }
-function affichagetrier () {
+
+function affichagetrier($user_id) {
     try {
         // Connexion à la base de données
         $pdo = config::getConnexion();
 
-        // Requête SQL pour récupérer les chansons triées par le nombre de streams
+        // Requête SQL pour récupérer les chansons triées par le nombre de streams et filtrées par user_id
         $sql = "SELECT c.id, c.image_path, c.song_title, c.album_name, c.duree, 
-               IFNULL(SUM(s.stream_count), 0) AS total_streams
-        FROM chanson c
-        LEFT JOIN streaming_stats s ON c.id = s.music_id
-        GROUP BY c.id, c.image_path, c.song_title, c.album_name, c.duree
-        ORDER BY total_streams DESC";
-         // Trie par nombre de streams décroissant
+                       IFNULL(SUM(s.stream_count), 0) AS total_streams
+                FROM chanson c
+                LEFT JOIN streaming_stats s ON c.id = s.music_id
+                WHERE c.artiste_id = :user_id
+                GROUP BY c.id, c.image_path, c.song_title, c.album_name, c.duree
+                ORDER BY total_streams DESC";
+        
+        // Préparer la requête
+        $stmt = $pdo->prepare($sql);
 
-        $stmt = $pdo->query($sql);
+        // Lier la variable $user_id à :user_id
+        $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+
+        // Exécuter la requête
+        $stmt->execute();
         
         // Récupération des résultats
         $songs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Retourner les chansons triées
         return $songs;
         
     } catch (PDOException $e) {
-        return []; // En cas d'erreur, retourner un tableau vide
+        // Retourner un tableau vide en cas d'erreur
+        return [];
     }
 }
+
 
 
 function deleteSong($pdo, $songId) {

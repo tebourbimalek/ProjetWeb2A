@@ -203,10 +203,9 @@ body {
     margin: 5px;
     border-radius: 8px;
     width: 96%;
-    height: 470px;
+    height: 462px;
     overflow-y: auto;
     border: 1px solid #282828;
-    
     /* Custom scrollbar styling */
     scrollbar-width: thin;
     scrollbar-color: #535353 #121212;
@@ -405,7 +404,7 @@ body {
     padding: 32px;
     margin: 5px;
     width: 81%;
-    height: 170px;
+    height: 190px;
 }
 .c{
   font-size: 10px;

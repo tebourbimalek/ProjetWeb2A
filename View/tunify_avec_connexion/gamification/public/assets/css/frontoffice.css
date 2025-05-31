@@ -1,0 +1,186 @@
+body {  
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #121212;
+    color: white;
+  }
+  
+  header {
+    background-color: #1f1f1f;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 24px;
+    border-bottom: 2px solid #333;
+  }
+  
+  .logo {
+    height: 50px;
+  }
+  
+  .header-buttons {
+    display: flex;
+    gap: 16px;
+  }
+  
+  .header-buttons button {
+    background-color: #9c27b0;
+    border: none;
+    color: white;
+    padding: 10px 16px;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  
+  .header-buttons button:hover {
+    background-color: #ba68c8;
+  }
+  
+  h1 {
+    text-align: center;
+    margin: 30px 0 10px;
+    font-size: 2rem;
+  }
+  
+  .game-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); /* auto-fill instead of auto-fit */
+    gap: 24px;
+    padding: 30px;
+    margin: auto;
+  }
+  
+  .game-card {
+    background-color: #1e1e1e;
+    border: 2px solid #444;
+    border-radius: 12px;
+    padding: 15px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+    transition: transform 0.3s, box-shadow 0.3s, filter 0.3s;
+  }
+  
+  .game-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 18px rgba(255, 255, 255, 0.25);
+  }
+  
+  .game-card img {
+    width: 100%;
+    height: auto; /* Ensures the aspect ratio is maintained */
+    max-height: 160px; /* Controls the maximum height of the image */
+    object-fit: cover;
+    border-radius: 6px;
+    margin-bottom: 10px;
+  }
+  
+  .game-card button {
+    margin-top: 8px;
+    padding: 10px 18px;
+    background-color: #9c27b0;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  .game-card button:hover {
+    background-color: #ba68c8;
+  }
+  .game-card {
+    transition: box-shadow 0.3s ease;
+  }
+  
+  .active-game {
+    box-shadow: 0 4px 12px rgba(0, 255, 0, 0.5); /* green glow */
+  }
+  
+  .inactive-game {
+    box-shadow: 0 4px 12px rgba(255, 0, 0, 0.5); /* red glow */
+  }
+  header {
+    background-color: #1f1f1f;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 32px;
+    border-bottom: 4px solid #333;
+  }
+  
+  .logo {
+    height: 50px;
+  }
+  
+  .header-buttons {
+    display: flex;
+    gap: 16px;
+  }
+  
+  .header-buttons button {
+    background-color: #9c27b0;
+    border: none;
+    color: white;
+    padding: 10px 16px;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  
+  h1 {
+    text-align: center;
+    color: white;
+    margin: 30px 0;
+  }
+  #rewards-table {
+    border-collapse: separate;
+    border-spacing: 0 10px;
+}
+
+#rewards-table th {
+    background-color: #f8f9fa;
+    padding: 12px 15px;
+    text-align: left;
+}
+
+#rewards-table td {
+    padding: 12px 15px;
+    vertical-align: middle;
+    background-color: white;
+    border-top: 1px solid #dee2e6;
+    border-bottom: 1px solid #dee2e6;
+}
+
+#rewards-table tr:hover td {
+    background-color: #f8f9fa;
+}
+
+.no-image-placeholder {
+    width: 50px;
+    height: 50px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6c757d;
+}
+
+.badge {
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.badge-success {
+    background-color: #28a745;
+    color: white;
+}
+
+.badge-danger {
+    background-color: #dc3545;
+    color: white;
+}

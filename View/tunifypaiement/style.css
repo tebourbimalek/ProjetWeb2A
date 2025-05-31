@@ -1,0 +1,343 @@
+:root {
+    --bg-main: #121212;
+    --bg-dark: #1e1e1e;
+    --accent-pink: #FF69B4;
+    --accent-green: #32CD32;
+    --accent-blue: #1E90FF;
+    --accent-purple: #4B0082;
+    --text-light: #ffffff;
+    --text-muted: #aaa;
+    --input-bg: #2a2a2a;
+    --transition: 0.3s ease;
+  }
+  
+  body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background-color: var(--bg-main);
+    color: var(--text-light);
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: black;
+    padding: 10px 20px;
+    margin: 2px;
+    color: white;
+  }
+  
+  .left-section {
+    display: flex;
+    align-items: center;
+  }
+  
+  .logo {
+    width: 30px;
+    margin-right: 10px;
+  }
+  
+  .search-bar {
+    display: flex;
+    align-items: center;
+    background-color: var(--input-bg);
+    border-radius: 20px;
+    padding: 5px 10px;
+    width: 80%;
+    border: 2px solid transparent;
+    transition: border-color var(--transition), background-color var(--transition);
+  }
+  
+  .search-bar input {
+    border: none;
+    background: none;
+    color: white;
+    outline: none;
+    width: 100%;
+  }
+  
+  .search-bar:hover {
+    background-color: #333;
+  }
+  
+  .search-bar:focus-within {
+    border-color: white;
+  }
+  
+  .right-section {
+    display: flex;
+    align-items: center;
+  }
+  
+  .right-section a {
+    color: #888;
+    text-decoration: none;
+    margin: 0 10px;
+    transition: color var(--transition), font-size var(--transition);
+  }
+  
+  .right-section a:hover {
+    color: white;
+    font-size: 17px;
+    text-decoration: underline;
+  }
+  
+  .divider {
+    color: gray;
+  }
+  
+  .main-content {
+    padding: 20px;
+    flex-grow: 1;
+  }
+  
+  /* DASHBOARD */
+  .user-profile {
+    margin-left: 0;
+    margin-top: 15px;
+  }
+  
+  .promo-banner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(to right, var(--accent-purple), var(--bg-dark));
+    padding: 30px;
+    border-radius: 10px;
+    margin: 20px;
+    flex-wrap: wrap;
+  }
+  
+  .promo-text {
+    color: white;
+    max-width: 50%;
+  }
+  
+  .promo-text h1 {
+    font-size: 2.5rem;
+    margin: 0;
+  }
+  
+  .promo-text p {
+    font-size: 1.2rem;
+    margin-top: 10px;
+  }
+  
+  .promo-button {
+    display: inline-block;
+    background: var(--accent-pink);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 30px;
+    text-decoration: none;
+    font-weight: bold;
+    margin-top: 15px;
+    transition: background-color var(--transition);
+  }
+  
+  .promo-button:hover {
+    background: #d4579e;
+  }
+  
+  .promo-image img {
+    width: 205px;
+    border-radius: 10px;
+  }
+  
+  .stats {
+    display: flex;
+    gap: 20px;
+    margin-top: 20px;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  
+  .offer-card {
+    padding: 20px;
+    border-radius: 10px;
+    width: 280px;
+    text-align: left;
+    background-color: var(--bg-dark);
+    border: 3px solid;
+    transition: transform var(--transition), box-shadow var(--transition);
+  }
+  
+  .offer-card:hover {
+    transform: scale(1.03);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+  }
+  
+  .offer-card h3 {
+    font-size: 22px;
+    margin-bottom: 5px;
+  }
+  
+  .offer-card ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 10px 0;
+  }
+  
+  .offer-button {
+    display: block;
+    color: white;
+    padding: 10px;
+    text-align: center;
+    border-radius: 40px;
+    text-decoration: none;
+    margin-top: 20px;
+    font-weight: bold;
+  }
+  
+  .offer-personnel { border-color: var(--accent-pink); }
+  .offer-familial  { border-color: var(--accent-green); }
+  .offer-duo       { border-color: var(--accent-blue); }
+  .offer-mini      { border-color: var(--accent-purple); }
+  
+  .offer-personnel .offer-button { background: var(--accent-pink); }
+  .offer-familial  .offer-button { background: var(--accent-green); }
+  .offer-duo       .offer-button { background: var(--accent-blue); }
+  .offer-mini      .offer-button { background: var(--accent-purple); }
+  
+  .footer {
+    background: var(--bg-dark);
+    padding: 20px;
+    text-align: center;
+    color: white;
+    margin-top: 20px;
+  }
+  
+  .footer-container {
+    display: flex;
+    justify-content: space-around;
+    padding: 20px;
+    flex-wrap: wrap;
+  }
+  
+  .footer-section {
+    max-width: 200px;
+  }
+  
+  .footer-section h4 {
+    margin-bottom: 10px;
+  }
+  
+  .footer-section ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .footer-section ul li a {
+    text-decoration: none;
+    color: white;
+    opacity: 0.7;
+    transition: opacity var(--transition);
+  }
+  
+  .footer-section ul li a:hover {
+    opacity: 1;
+  }
+  
+  .footer-social {
+    text-align: center;
+    padding: 10px;
+  }
+  
+  .footer-social a {
+    color: white;
+    margin: 0 10px;
+    font-size: 24px;
+    opacity: 0.7;
+    transition: opacity var(--transition);
+  }
+  
+  .footer-social a:hover {
+    opacity: 1;
+  }
+  
+  /* PAYMENT */
+  .payment-container {
+    background: var(--bg-dark);
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(255, 255, 255, 0.1);
+    max-width: 400px;
+    margin: 40px auto;
+  }
+  
+  .payment-option {
+    margin: 18px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  
+  .form-container {
+    margin-top: 20px;
+    display: none;
+  }
+  
+  .form-container input,
+  .form-container select {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    border: 1px solid #444;
+    background-color: #333;
+    color: white;
+  }
+  
+  button {
+    background-color: var(--accent-purple);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 20px;
+    transition: background-color var(--transition);
+  }
+  
+  button:hover {
+    background-color: #1aab47;
+  }
+  
+  .payment-images img {
+    margin: 10px;
+    border-radius: 5px;
+    max-width: 100px;
+  }
+  
+  .card-input {
+    display: flex;
+    align-items: center;
+    background-color: #333;
+    border: 1px solid #444;
+    border-radius: 5px;
+    padding: 10px;
+    margin-top: 10px;
+  }
+  
+  .card-input input {
+    border: none;
+    background: transparent;
+    color: white;
+    outline: none;
+    flex: 1;
+    font-size: 16px;
+    letter-spacing: 1px;
+  }
+  
+  .card-icon {
+    color: white;
+    margin-right: 10px;
+    font-size: 18px;
+  }
+  
